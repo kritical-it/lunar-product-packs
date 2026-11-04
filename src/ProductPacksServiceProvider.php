@@ -20,6 +20,8 @@ class ProductPacksServiceProvider extends ServiceProvider
             return;
         }
 
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'product-packs');
+
         if (! config('lunar.database.disable_migrations', false)) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
