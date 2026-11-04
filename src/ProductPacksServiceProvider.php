@@ -2,6 +2,7 @@
 
 namespace Gongarce\ProductPacks;
 
+use Gongarce\ProductPacks\Console\ImportCrossSellPacks;
 use Gongarce\ProductPacks\Models\PackItem;
 use Gongarce\ProductPacks\Observers\PackChanges;
 use Illuminate\Support\ServiceProvider;
@@ -32,5 +33,9 @@ class ProductPacksServiceProvider extends ServiceProvider
         ModelManifest::addDirectory(__DIR__.'/Models');
 
         PackChanges::register();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([ImportCrossSellPacks::class]);
+        }
     }
 }
