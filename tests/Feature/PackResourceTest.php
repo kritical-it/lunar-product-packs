@@ -16,16 +16,6 @@ beforeEach(function () {
     $this->asStaff();
 });
 
-function packWith(array $products, PackStatus $status = PackStatus::Draft): Pack
-{
-    $pack = Pack::create(['status' => $status]);
-    foreach ($products as $i => $product) {
-        $pack->items()->create(['product_id' => $product->id, 'position' => $i + 1]);
-    }
-
-    return $pack;
-}
-
 it('creates a draft pack with its products', function () {
     $cups = Catalog::product();
     $lids = Catalog::product();
@@ -133,4 +123,20 @@ it('deletes a pack', function () {
 
     $this->assertModelMissing($pack);
     expect(packEvents(PackChangeReason::Deleted)->sole()->productIds)->toBe([$cups->id, $lids->id]);
+});
+
+it('tidies the links after removing a product', function () {
+    ['pack' => $pack, 'cups' => $cups, 'lids' => $lids, 'cupItem' => $cupItem, 'lidItem' => $lidItem, 'link' => $link] = cupsAndLids();
+    $pack->items()->create(['product_id' => Catalog::product()->id, 'position' => 3]);
+    $cupRule = $cupItem->options()->sole();
+    $row = $link->rows()->create(['position' => 3]);
+    $row->values()->create(['pack_item_option_id' => $cupRule->id, 'product_option_value_id' => Catalog::value($cups, 'Unidades', '100')->id]);
+    $row->values()->create(['pack_item_option_id' => $lidItem->options()->sole()->id, 'product_option_value_id' => Catalog::value($lids, 'Unidades', '1000')->id]);
+
+    $page = Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()]);
+    $items = $page->get('data.items');
+    unset($items[collect($items)->search(fn ($item) => $item['product_id'] === $lids->id)]);
+    $page->set('data.items', $items)->call('save')->assertHasNoFormErrors();
+
+    expect($link->rows()->count())->toBe(2);
 });

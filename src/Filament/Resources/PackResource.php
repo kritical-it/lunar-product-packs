@@ -73,10 +73,7 @@ class PackResource extends Resource
      */
     public static function errorMessages(Pack $pack): array
     {
-        return array_values(array_unique(array_map(
-            fn (string $key) => __('product-packs::validation.'.$key),
-            app(PackValidator::class)->errors($pack->fresh()),
-        )));
+        return app(PackValidator::class)->errors($pack->fresh());
     }
 
     public static function form(Form $form): Form

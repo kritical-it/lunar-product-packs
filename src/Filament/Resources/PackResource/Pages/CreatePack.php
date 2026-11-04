@@ -3,6 +3,7 @@
 namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
+use Gongarce\ProductPacks\Editing\PackEditor;
 use Gongarce\ProductPacks\Filament\Resources\PackResource;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,7 @@ class CreatePack extends CreateRecord
 
     protected function afterCreate(): void
     {
+        app(PackEditor::class)->tidy($this->getRecord());
         $this->ensurePublishable($this->getRecord(), null);
     }
 

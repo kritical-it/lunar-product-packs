@@ -5,6 +5,7 @@ namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Gongarce\ProductPacks\Enums\PackStatus;
+use Gongarce\ProductPacks\Editing\PackEditor;
 use Gongarce\ProductPacks\Filament\Resources\PackResource;
 
 class EditPack extends EditRecord
@@ -34,6 +35,7 @@ class EditPack extends EditRecord
 
     protected function afterSave(): void
     {
+        app(PackEditor::class)->tidy($this->getRecord());
         $this->ensurePublishable($this->getRecord(), $this->statusBefore);
     }
 

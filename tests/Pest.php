@@ -61,3 +61,17 @@ function packProductIds(?\Gongarce\ProductPacks\Events\PackChangeReason $reason 
 {
     return \Gongarce\ProductPacks\Events\PackChanged::normalizeIds(packEvents($reason)->flatMap(fn ($event) => $event->productIds));
 }
+
+/**
+ * A pack with the given products, in that order, and no rules.
+ */
+function packWith(array $products, \Gongarce\ProductPacks\Enums\PackStatus $status = \Gongarce\ProductPacks\Enums\PackStatus::Draft): \Gongarce\ProductPacks\Models\Pack
+{
+    $pack = \Gongarce\ProductPacks\Models\Pack::create(['status' => $status]);
+    foreach ($products as $i => $product) {
+        $pack->items()->create(['product_id' => $product->id, 'position' => $i + 1]);
+    }
+
+    return $pack;
+}
+
