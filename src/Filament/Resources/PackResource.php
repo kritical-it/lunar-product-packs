@@ -68,8 +68,34 @@ class PackResource extends BaseResource
             ->join(' + ') ?: __('product-packs::panel.untitled');
     }
 
+    /** @var \WeakMap<Pack, list<string>>|null */
+    private static ?\WeakMap $listed = null;
+
     /**
-     * The validator's messages for the pack.
+     * The validator's messages for a pack of a list, loaded with
+     * listRelations(): as it is, once per record.
+     *
+     * @return list<string>
+     */
+    public static function listedErrors(Pack $pack): array
+    {
+        self::$listed ??= new \WeakMap;
+
+        return self::$listed[$pack] ??= app(PackValidator::class)->errors($pack);
+    }
+
+    /**
+     * What a list of packs loads to show their names and errors.
+     *
+     * @return list<string>
+     */
+    public static function listRelations(string $prefix = ''): array
+    {
+        return array_map(fn (string $relation) => $prefix.$relation, ['items.product', ...PackValidator::RELATIONS]);
+    }
+
+    /**
+     * The validator's messages for the pack, as saved.
      *
      * @return list<string>
      */
@@ -147,7 +173,7 @@ class PackResource extends BaseResource
     protected static function getDefaultTable(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with('items.product'))
+            ->modifyQueryUsing(fn ($query) => $query->with(self::listRelations()))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('product-packs::panel.fields.title'))
@@ -162,10 +188,10 @@ class PackResource extends BaseResource
                     ->counts('items'),
                 Tables\Columns\IconColumn::make('has_errors')
                     ->label(__('product-packs::panel.fields.errors'))
-                    ->state(fn (Pack $record): bool => self::errorMessages($record) !== [])
+                    ->state(fn (Pack $record): bool => self::listedErrors($record) !== [])
                     ->icon(fn (bool $state): string => $state ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-check-circle')
                     ->color(fn (bool $state): string => $state ? 'warning' : 'success')
-                    ->tooltip(fn (Pack $record): ?string => implode(' ', self::errorMessages($record)) ?: null),
+                    ->tooltip(fn (Pack $record): ?string => implode(' ', self::listedErrors($record)) ?: null),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('product-packs::panel.fields.updated_at'))
                     ->dateTime()

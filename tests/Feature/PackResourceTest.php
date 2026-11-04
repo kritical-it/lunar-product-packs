@@ -173,3 +173,39 @@ it('forbids staff without the permission to manage products', function () {
 
     expect(\Gongarce\ProductPacks\Filament\Resources\PackResource::canViewAny())->toBeFalse();
 });
+
+/**
+ * Queries to render the page, for $packs packs of cups and lids.
+ */
+function queriesToList(string $page, array $params, int $packs, ?callable $make = null): int
+{
+    foreach (range(1, $packs) as $i) {
+        $make ? $make() : cupsAndLids();
+    }
+
+    \Illuminate\Support\Facades\DB::flushQueryLog();
+    \Illuminate\Support\Facades\DB::enableQueryLog();
+    Livewire::test($page, $params);
+    $count = count(\Illuminate\Support\Facades\DB::getQueryLog());
+    \Illuminate\Support\Facades\DB::disableQueryLog();
+
+    return $count;
+}
+
+it('lists packs with the same queries for one or ten', function () {
+    $one = queriesToList(ListPacks::class, [], 1);
+    $ten = queriesToList(ListPacks::class, [], 9);
+
+    expect($ten - $one)->toBeLessThan(5);
+});
+
+it('lists the packs of a product with the same queries for one or ten', function () {
+    $cups = Catalog::product(['Unidades' => ['100', '1000']]);
+    $make = fn () => packWith([$cups, Catalog::product(['Unidades' => ['100']])]);
+    $params = ['record' => $cups->getRouteKey()];
+
+    $one = queriesToList(\Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks::class, $params, 1, $make);
+    $ten = queriesToList(\Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks::class, $params, 9, $make);
+
+    expect($ten - $one)->toBeLessThan(5);
+});

@@ -15,16 +15,21 @@ use Gongarce\ProductPacks\Models\PackLinkRow;
 class PackValidator
 {
     /**
+     * What errors() reads: eager load it to check many packs at once.
+     */
+    public const RELATIONS = [
+        'items.product.productOptions',
+        'items.options.value',
+        'links.columns',
+        'links.rows.values.value',
+    ];
+
+    /**
      * @return list<string> translated messages, each once; empty when valid
      */
     public function errors(Pack $pack): array
     {
-        $pack->loadMissing([
-            'items.product.productOptions',
-            'items.options.value',
-            'links.columns',
-            'links.rows.values.value',
-        ]);
+        $pack->loadMissing(self::RELATIONS);
 
         $errors = [];
 

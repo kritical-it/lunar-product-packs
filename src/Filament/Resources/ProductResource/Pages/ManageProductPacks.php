@@ -49,7 +49,7 @@ class ManageProductPacks extends BaseManageRelatedRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with('pack.items.product'))
+            ->modifyQueryUsing(fn ($query) => $query->with(PackResource::listRelations('pack.')))
             ->columns([
                 Tables\Columns\TextColumn::make('pack_name')
                     ->label(__('product-packs::panel.fields.title'))
@@ -66,7 +66,7 @@ class ManageProductPacks extends BaseManageRelatedRecords
                     ->boolean(),
                 Tables\Columns\IconColumn::make('has_errors')
                     ->label(__('product-packs::panel.fields.errors'))
-                    ->state(fn (PackItem $record): bool => PackResource::errorMessages($record->pack) !== [])
+                    ->state(fn (PackItem $record): bool => PackResource::listedErrors($record->pack) !== [])
                     ->icon(fn (bool $state): string => $state ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-check-circle')
                     ->color(fn (bool $state): string => $state ? 'warning' : 'success'),
             ])
