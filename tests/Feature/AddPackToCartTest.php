@@ -21,18 +21,26 @@ function linesOf(array $setup, int $cupQuantity = 1, int $lidQuantity = 1): arra
     ];
 }
 
-it('adds every line with the pack in its meta', function () {
+it('adds every line', function () {
     $cart = app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup, 2, 3));
 
     expect($cart->lines)->toHaveCount(2)
-        ->and($cart->lines->pluck('quantity')->sort()->values()->all())->toBe([2, 3])
-        ->and($cart->lines->map(fn ($line) => (array) $line->meta)->all())->each->toMatchArray(['pack' => $this->setup['pack']->id]);
+        ->and($cart->lines->pluck('quantity')->sort()->values()->all())->toBe([2, 3]);
 });
 
-it('merges extra meta', function () {
+it('adds to the line of the same variant already in the cart', function () {
+    $this->cart->add($this->setup['cups']->variants->first(), 4);
+
+    $cart = app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup, 2, 3));
+
+    expect($cart->lines)->toHaveCount(2)
+        ->and($cart->lines->firstWhere('purchasable_id', $this->setup['cups']->variants->first()->id)->quantity)->toBe(6);
+});
+
+it('passes the given meta to every line', function () {
     $cart = app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup), ['list' => 'pack_1']);
 
-    expect((array) $cart->lines->first()->meta)->toMatchArray(['pack' => $this->setup['pack']->id, 'list' => 'pack_1']);
+    expect($cart->lines->map(fn ($line) => (array) $line->meta)->all())->each->toBe(['list' => 'pack_1']);
 });
 
 it('rejects a variant of a product outside the pack', function () {

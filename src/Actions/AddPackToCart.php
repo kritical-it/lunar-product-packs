@@ -12,7 +12,11 @@ use Lunar\Models\ProductVariant;
 /**
  * Add the chosen lines of a pack to a cart, all or none: Lunar adds them in
  * one transaction (Cart::addLines), so a line that fails its validation
- * (stock, quantity) adds nothing. Each line keeps the pack in its meta.
+ * (stock, quantity) adds nothing.
+ *
+ * The lines carry no mark of the pack: a variant added from a pack goes to
+ * the same line as when added from its page. A pack discount, when there is
+ * one, will look at what the cart holds.
  */
 class AddPackToCart
 {
@@ -47,7 +51,7 @@ class AddPackToCart
             $purchasables[] = [
                 'purchasable' => $variant,
                 'quantity' => $line['quantity'],
-                'meta' => ['pack' => $pack->id, ...$meta],
+                'meta' => $meta,
             ];
         }
 

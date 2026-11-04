@@ -7,6 +7,7 @@ use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
 use Gongarce\ProductPacks\Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
+uses(\Gongarce\ProductPacks\Tests\LongPrefixTestCase::class)->in('Prefixed');
 
 /**
  * Cups and lids linked by units, 100 ↔ 100 and 1000 ↔ 1000.
