@@ -17,6 +17,16 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        // The users table, which carts reference.
+        if (! \Illuminate\Support\Facades\Schema::hasTable('users')) {
+            \Illuminate\Support\Facades\Schema::create('users', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('email')->nullable();
+                $table->timestamps();
+            });
+        }
+
         Language::factory()->create(['code' => 'en', 'default' => true]);
         Currency::factory()->create(['default' => true]);
     }
