@@ -1,0 +1,136 @@
+<?php
+
+use Filament\Facades\Filament;
+use Filament\Tables\Actions\DeleteAction;
+use Gongarce\ProductPacks\Enums\PackStatus;
+use Gongarce\ProductPacks\Events\PackChangeReason;
+use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\CreatePack;
+use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\EditPack;
+use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\ListPacks;
+use Gongarce\ProductPacks\Models\Pack;
+use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use Livewire\Livewire;
+
+beforeEach(function () {
+    Filament::setCurrentPanel(Filament::getPanel('lunar'));
+    $this->asStaff();
+});
+
+function packWith(array $products, PackStatus $status = PackStatus::Draft): Pack
+{
+    $pack = Pack::create(['status' => $status]);
+    foreach ($products as $i => $product) {
+        $pack->items()->create(['product_id' => $product->id, 'position' => $i + 1]);
+    }
+
+    return $pack;
+}
+
+it('creates a draft pack with its products', function () {
+    $cups = Catalog::product();
+    $lids = Catalog::product();
+    fakePackEvents();
+
+    Livewire::test(CreatePack::class)
+        ->fillForm([
+            'title' => ['en' => 'Cups with lids'],
+            'status' => PackStatus::Draft->value,
+            'items' => [
+                'a' => ['product_id' => $cups->id, 'quantity' => 1, 'show_on_product' => true],
+                'b' => ['product_id' => $lids->id, 'quantity' => 10, 'show_on_product' => false],
+            ],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $pack = Pack::sole();
+    expect($pack->status)->toBe(PackStatus::Draft)
+        ->and($pack->translate('title'))->toBe('Cups with lids')
+        ->and($pack->items->map->only('product_id', 'quantity', 'show_on_product', 'position')->all())->toBe([
+            ['product_id' => $cups->id, 'quantity' => 1, 'show_on_product' => true, 'position' => 1],
+            ['product_id' => $lids->id, 'quantity' => 10, 'show_on_product' => false, 'position' => 2],
+        ])
+        ->and(packEvents())->toHaveCount(1);
+});
+
+it('puts the given product first when creating from a product', function () {
+    $cups = Catalog::product();
+
+    $items = Livewire::withQueryParams(['product' => $cups->id])
+        ->test(CreatePack::class)
+        ->get('data.items');
+
+    expect(array_values($items)[0]['product_id'])->toBe($cups->id);
+});
+
+it('refuses to create a published pack with errors', function () {
+    Livewire::test(CreatePack::class)
+        ->fillForm([
+            'status' => PackStatus::Published->value,
+            'items' => ['a' => ['product_id' => Catalog::product()->id, 'quantity' => 1, 'show_on_product' => true]],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['status']);
+
+    expect(Pack::count())->toBe(0);
+});
+
+it('refuses to publish a pack with errors', function () {
+    $pack = packWith([Catalog::product()]);
+
+    Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()])
+        ->fillForm(['status' => PackStatus::Published->value])
+        ->call('save')
+        ->assertHasFormErrors(['status']);
+
+    expect($pack->refresh()->status)->toBe(PackStatus::Draft)
+        ->and($pack->items)->toHaveCount(1);
+});
+
+it('publishes a valid pack', function () {
+    ['pack' => $pack] = cupsAndLids();
+    $pack->update(['status' => PackStatus::Draft]);
+
+    Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()])
+        ->fillForm(['status' => PackStatus::Published->value])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($pack->refresh()->status)->toBe(PackStatus::Published);
+});
+
+it('removes a product and saves once', function () {
+    $pack = packWith([Catalog::product(), Catalog::product(), $last = Catalog::product()]);
+    fakePackEvents();
+
+    $page = Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()]);
+    $items = $page->get('data.items');
+    $lastKey = collect($items)->search(fn ($item) => $item['product_id'] === $last->id);
+    unset($items[$lastKey]);
+
+    $page->set('data.items', $items)->call('save')->assertHasNoFormErrors();
+
+    expect($pack->items()->pluck('product_id')->all())->not->toContain($last->id)
+        ->and($pack->items()->count())->toBe(2)
+        ->and(packEvents())->toHaveCount(1);
+});
+
+it('lists packs and flags the ones with errors', function () {
+    ['pack' => $good] = cupsAndLids();
+    $bad = packWith([Catalog::product()]);
+
+    Livewire::test(ListPacks::class)
+        ->assertCanSeeTableRecords([$good, $bad])
+        ->assertTableColumnStateSet('has_errors', false, $good)
+        ->assertTableColumnStateSet('has_errors', true, $bad);
+});
+
+it('deletes a pack', function () {
+    ['pack' => $pack, 'cups' => $cups, 'lids' => $lids] = cupsAndLids();
+    fakePackEvents();
+
+    Livewire::test(ListPacks::class)->callTableAction(DeleteAction::class, $pack);
+
+    $this->assertModelMissing($pack);
+    expect(packEvents(PackChangeReason::Deleted)->sole()->productIds)->toBe([$cups->id, $lids->id]);
+});
