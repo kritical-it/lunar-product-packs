@@ -209,3 +209,8 @@ it('lists the packs of a product with the same queries for one or ten', function
 
     expect($ten - $one)->toBeLessThan(5);
 });
+
+it('puts the pack pages menu on the right, like the products', function () {
+    expect(\Gongarce\ProductPacks\Filament\Resources\PackResource::getSubNavigationPosition())
+        ->toBe(\Lunar\Admin\Filament\Resources\ProductResource::getSubNavigationPosition());
+});

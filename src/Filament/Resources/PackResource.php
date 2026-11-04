@@ -4,6 +4,7 @@ namespace Gongarce\ProductPacks\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,6 +24,8 @@ class PackResource extends BaseResource
     protected static ?string $model = Pack::class;
 
     protected static ?string $permission = 'catalog:manage-products';
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::End;
 
     protected static ?int $navigationSort = 4;
 
