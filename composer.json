@@ -1,0 +1,63 @@
+{
+  "name": "gongarce/lunar-product-packs",
+  "description": "Product packs for Lunar: products bought together, with their quantities and linked options",
+  "keywords": [
+    "lunar",
+    "laravel",
+    "ecommerce",
+    "e-commerce",
+    "headless",
+    "store",
+    "shop",
+    "cart"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "GonGarce",
+      "homepage": "https://github.com/zalito12"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Gongarce\\ProductPacks\\": "src",
+      "Gongarce\\ProductPacks\\Database\\Factories\\": "database/factories"
+    }
+  },
+  "extra": {
+    "lunar": {
+      "name": "Lunar Product Packs"
+    },
+    "laravel": {
+      "providers": [
+        "Gongarce\\ProductPacks\\ProductPacksServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^8.2",
+    "lunarphp/lunar": "~1.4.0"
+  },
+  "prefer-stable": true,
+  "require-dev": {
+    "orchestra/testbench": "^10.0",
+    "pestphp/pest": "^3.0",
+    "pestphp/pest-plugin-laravel": "^3.0",
+    "pestphp/pest-plugin-livewire": "^3.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Gongarce\\ProductPacks\\Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "pest"
+  }
+}
