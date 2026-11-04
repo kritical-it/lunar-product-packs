@@ -30,6 +30,8 @@ return [
         'options' => 'Options and links',
     ],
     'options' => [
+        'deleted_product' => 'Deleted product: its options are kept as they are.',
+        'stale' => 'The pack has changed since this page was opened. Reload it to see the changes; nothing was saved.',
         'no_options' => 'No options.',
         'free' => 'Free',
         'fixed' => 'Fixed',

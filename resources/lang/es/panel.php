@@ -30,6 +30,8 @@ return [
         'options' => 'Opciones y enlaces',
     ],
     'options' => [
+        'deleted_product' => 'Producto borrado: sus opciones se quedan como están.',
+        'stale' => 'El pack ha cambiado desde que abriste esta página. Recárgala para ver los cambios; no se ha guardado nada.',
         'no_options' => 'Sin opciones.',
         'free' => 'Libre',
         'fixed' => 'Fija',

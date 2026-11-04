@@ -25,7 +25,8 @@ class PackEditor
      *
      * @param  array<int, array<int, array{choice: string, value?: ?int}>>  $choices
      *                                                                                [itemId => [optionId => ['choice' => 'free'|'fixed'|'link:A'…, 'value' => ?int]]]
-     *                                                                                The options not given lose their rule: their product no longer has them.
+     *                                                                                Products not given are left as they are. The options not given of a
+     *                                                                                product given lose their rule: their product no longer has them.
      */
     public function saveRules(Pack $pack, array $choices): void
     {
@@ -41,7 +42,11 @@ class PackEditor
 
             /** @var PackItem $item */
             foreach ($pack->items()->with('options')->get() as $item) {
-                $given = $choices[$item->id] ?? [];
+                if (! array_key_exists($item->id, $choices)) {
+                    continue;
+                }
+
+                $given = $choices[$item->id];
 
                 foreach ($item->options as $rule) {
                     if (! array_key_exists($rule->product_option_id, $given)) {

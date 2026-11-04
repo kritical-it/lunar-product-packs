@@ -10,6 +10,7 @@ use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Gongarce\ProductPacks\Editing\PackEditor;
 use Gongarce\ProductPacks\Enums\OptionMode;
+use Gongarce\ProductPacks\Enums\PackStatus;
 use Gongarce\ProductPacks\Filament\Resources\PackResource;
 use Gongarce\ProductPacks\Models\Pack;
 use Gongarce\ProductPacks\Models\PackItem;
@@ -80,8 +81,10 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
             ->schema($this->pack()->items->map(fn (PackItem $item) => Forms\Components\Section::make($this->itemLabel($item))
                 ->statePath("item_{$item->id}")
                 ->columns(2)
-                ->schema($item->product->productOptions->isEmpty()
-                    ? [Forms\Components\Placeholder::make('none')->hiddenLabel()->content(__('product-packs::panel.options.no_options'))]
+                ->schema(! $item->product || $item->product->productOptions->isEmpty()
+                    ? [Forms\Components\Placeholder::make('none')->hiddenLabel()->content($item->product
+                        ? __('product-packs::panel.options.no_options')
+                        : __('product-packs::panel.options.deleted_product'))]
                     : $item->product->productOptions->map(fn (ProductOption $option) => Forms\Components\Group::make()
                         ->statePath("option_{$option->id}")
                         ->columns(2)
@@ -141,11 +144,22 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
 
     public function saveRules(): void
     {
+        if ($this->isStale()) {
+            return;
+        }
+
         $state = $this->rulesForm->getState();
+        $editable = $this->pack()->items->filter(fn (PackItem $item) => $item->product)->pluck('id')->all();
         $choices = [];
 
         foreach ($state as $itemKey => $options) {
             $itemId = (int) Str::after($itemKey, 'item_');
+
+            // A deleted product shows no options: its rules are kept.
+            if (! in_array($itemId, $editable, true)) {
+                continue;
+            }
+
             $choices[$itemId] = [];
 
             foreach ((array) $options as $optionKey => $choice) {
@@ -162,12 +176,17 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
 
         app(PackEditor::class)->saveRules($this->pack(), $choices);
 
+        // The links depend on the rules: both forms are rebuilt.
         $this->fillForms();
         $this->notifySaved();
     }
 
     public function saveLinks(): void
     {
+        if ($this->isStale()) {
+            return;
+        }
+
         $state = $this->linksForm->getState();
         $editor = app(PackEditor::class);
         $toSave = [];
@@ -195,7 +214,8 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
             }
         });
 
-        $this->fillForms();
+        // Only the links: unsaved changes to the options stay.
+        $this->fillForms(rules: false);
         $this->notifySaved();
     }
 
@@ -246,7 +266,7 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
 
     public function isPublished(): bool
     {
-        return $this->pack()->status === \Gongarce\ProductPacks\Enums\PackStatus::Published;
+        return $this->pack()->status === PackStatus::Published;
     }
 
     public function hasLinks(): bool
@@ -254,17 +274,48 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
         return $this->pack()->links->isNotEmpty();
     }
 
-    private function fillForms(): void
+    /**
+     * What the forms were built for: the products, their options and the
+     * links. Saving from a page opened before the pack changed would apply
+     * its letters and fields to another pack.
+     */
+    public string $fingerprint = '';
+
+    private function fingerprint(Pack $pack): string
+    {
+        return md5(json_encode([
+            $pack->items->map(fn (PackItem $item) => [$item->id, $item->product?->id, $item->product?->productOptions->pluck('id')->all()])->all(),
+            $pack->links->pluck('id')->all(),
+        ]));
+    }
+
+    private function isStale(): bool
+    {
+        if ($this->fingerprint === $this->fingerprint($this->pack(fresh: true))) {
+            return false;
+        }
+
+        Notification::make()
+            ->title(__('product-packs::panel.options.stale'))
+            ->danger()
+            ->persistent()
+            ->send();
+
+        return true;
+    }
+
+    private function fillForms(bool $rules = true): void
     {
         $pack = $this->pack(fresh: true);
+        $this->fingerprint = $this->fingerprint($pack);
         $letters = $pack->links->values()->mapWithKeys(fn (PackLink $link, int $i) => [$link->id => $this->letter($i)]);
 
-        $rules = [];
+        $rulesState = [];
         foreach ($pack->items as $item) {
-            foreach ($item->product->productOptions as $option) {
+            foreach ($item->product?->productOptions ?? [] as $option) {
                 $rule = $item->options->firstWhere('product_option_id', $option->id);
 
-                $rules["item_{$item->id}"]["option_{$option->id}"] = match (true) {
+                $rulesState["item_{$item->id}"]["option_{$option->id}"] = match (true) {
                     $rule?->mode === OptionMode::Fixed => ['choice' => 'fixed', 'value' => $rule->product_option_value_id],
                     $rule?->mode === OptionMode::Linked && $letters->has($rule->pack_link_id) => ['choice' => 'link:'.$letters[$rule->pack_link_id], 'value' => null],
                     default => ['choice' => 'free', 'value' => null],
@@ -285,7 +336,9 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
 
         // Forms are rebuilt from the saved pack before they are filled.
         $this->cacheForms();
-        $this->rulesForm->fill($rules);
+        if ($rules) {
+            $this->rulesForm->fill($rulesState);
+        }
         $this->linksForm->fill($links);
     }
 
@@ -321,12 +374,12 @@ class ManagePackOptions extends Page implements Forms\Contracts\HasForms
 
     private function itemLabel(PackItem $item): string
     {
-        return $item->product->translateAttribute('name').' · × '.$item->quantity;
+        return ($item->product?->translateAttribute('name') ?? __('product-packs::panel.options.deleted_product')).' · × '.$item->quantity;
     }
 
     private function columnLabel(PackItemOption $rule): string
     {
-        return $rule->item->product->translateAttribute('name').': '.$rule->option->translate('name');
+        return ($rule->item->product?->translateAttribute('name') ?? __('product-packs::panel.options.deleted_product')).': '.$rule->option->translate('name');
     }
 
     private function notifySaved(): void

@@ -4,8 +4,6 @@ namespace Gongarce\ProductPacks\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Pages\Page;
-use Filament\Resources\Resource;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -14,13 +12,17 @@ use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
 use Gongarce\ProductPacks\Models\Pack;
 use Gongarce\ProductPacks\Models\PackItem;
 use Gongarce\ProductPacks\PackValidator;
+use Illuminate\Support\HtmlString;
 use Lunar\Admin\Support\Forms\Components\TranslatedText;
+use Lunar\Admin\Support\Resources\BaseResource;
 use Lunar\Models\Contracts\Product as ProductContract;
 use Lunar\Models\Product;
 
-class PackResource extends Resource
+class PackResource extends BaseResource
 {
     protected static ?string $model = Pack::class;
+
+    protected static ?string $permission = 'catalog:manage-products';
 
     protected static ?int $navigationSort = 4;
 
@@ -73,12 +75,27 @@ class PackResource extends Resource
      */
     public static function errorMessages(Pack $pack): array
     {
-        return app(PackValidator::class)->errors($pack->fresh());
+        $fresh = $pack->fresh();
+
+        return $fresh ? app(PackValidator::class)->errors($fresh) : [];
     }
 
-    public static function form(Form $form): Form
+    public static function getDefaultForm(Form $form): Form
     {
         return $form->schema([
+            Forms\Components\Section::make(fn (Pack $record) => $record->status === PackStatus::Published
+                ? __('product-packs::panel.options.errors_published')
+                : __('product-packs::panel.options.errors'))
+                ->icon('heroicon-o-exclamation-triangle')
+                ->iconColor('warning')
+                ->visible(fn (?Pack $record) => $record?->exists && self::errorMessages($record) !== [])
+                ->schema([
+                    Forms\Components\Placeholder::make('pack_errors')
+                        ->hiddenLabel()
+                        ->content(fn (Pack $record) => new HtmlString('<ul class="list-disc ps-5">'.collect(self::errorMessages($record))
+                            ->map(fn (string $message) => '<li>'.e($message).'</li>')
+                            ->join('').'</ul>')),
+                ]),
             Forms\Components\Section::make()->schema([
                 TranslatedText::make('title')
                     ->label(__('product-packs::panel.fields.title'))
@@ -127,7 +144,7 @@ class PackResource extends Resource
         ])->columns(1);
     }
 
-    public static function table(Table $table): Table
+    protected static function getDefaultTable(Table $table): Table
     {
         return $table
             ->modifyQueryUsing(fn ($query) => $query->with('items.product'))
@@ -182,15 +199,15 @@ class PackResource extends Resource
         ];
     }
 
-    public static function getRecordSubNavigation(Page $page): array
+    protected static function getDefaultSubNavigation(): array
     {
-        return $page->generateNavigationItems([
+        return [
             Pages\EditPack::class,
             Pages\ManagePackOptions::class,
-        ]);
+        ];
     }
 
-    public static function getPages(): array
+    protected static function getDefaultPages(): array
     {
         return [
             'index' => Pages\ListPacks::route('/'),

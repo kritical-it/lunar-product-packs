@@ -177,3 +177,13 @@ it('proposes the rows whose values have the same name', function () {
         $lidRule->id => Catalog::value($lids, 'Tamaño', '240  ML ')->id,
     ]]);
 });
+
+it('leaves untouched the products not given', function () {
+    ['pack' => $pack, 'cups' => $cups, 'cupItem' => $cupItem, 'lidItem' => $lidItem] = cupsAndLids();
+
+    app(PackEditor::class)->saveRules($pack, [
+        $cupItem->id => [Catalog::option($cups, 'Unidades')->id => ['choice' => 'link:A']],
+    ]);
+
+    expect($lidItem->options()->count())->toBe(1);
+});

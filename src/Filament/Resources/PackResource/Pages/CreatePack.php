@@ -6,6 +6,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Gongarce\ProductPacks\Editing\PackEditor;
 use Gongarce\ProductPacks\Filament\Resources\PackResource;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CreatePack extends CreateRecord
 {
@@ -14,6 +15,18 @@ class CreatePack extends CreateRecord
     protected static string $resource = PackResource::class;
 
     protected ?bool $hasDatabaseTransactions = true;
+
+    public function create(bool $another = false): void
+    {
+        try {
+            parent::create($another);
+        } catch (ValidationException $exception) {
+            // The transaction is rolled back: the record no longer exists.
+            $this->record = null;
+
+            throw $exception;
+        }
+    }
 
     protected function afterFill(): void
     {

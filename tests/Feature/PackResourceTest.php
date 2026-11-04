@@ -140,3 +140,36 @@ it('tidies the links after removing a product', function () {
 
     expect($link->rows()->count())->toBe(2);
 });
+
+it('creates a draft after a refused publish', function () {
+    $page = Livewire::test(CreatePack::class)
+        ->fillForm([
+            'status' => PackStatus::Published->value,
+            'items' => ['a' => ['product_id' => Catalog::product()->id, 'quantity' => 1, 'show_on_product' => true]],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['status']);
+
+    $page->fillForm(['status' => PackStatus::Draft->value])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Pack::count())->toBe(1);
+});
+
+it('warns on the edit page of a pack with errors', function () {
+    $pack = packWith([Catalog::product()], PackStatus::Published);
+
+    Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()])
+        ->assertSee(__('product-packs::validation.fewer_than_two_items'));
+});
+
+it('forbids staff without the permission to manage products', function () {
+    $staff = \Lunar\Admin\Models\Staff::create([
+        'first_name' => 'No', 'last_name' => 'Rights', 'email' => 'none@example.test',
+        'password' => bcrypt('password'), 'admin' => false,
+    ]);
+    $this->actingAs($staff, 'staff');
+
+    expect(\Gongarce\ProductPacks\Filament\Resources\PackResource::canViewAny())->toBeFalse();
+});

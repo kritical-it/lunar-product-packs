@@ -94,3 +94,39 @@ it('shows the validator errors', function () {
 
     optionsPage($pack)->assertSee(__('product-packs::validation.link_without_rows'));
 });
+
+it('shows a pack with a deleted product and keeps its rules', function () {
+    ['pack' => $pack, 'lids' => $lids, 'lidItem' => $lidItem] = cupsAndLids();
+    $lids->delete();
+
+    optionsPage($pack)->assertOk()->call('saveRules')->assertHasNoErrors();
+
+    expect($lidItem->options()->count())->toBe(1);
+});
+
+it('refuses to save the rules of a pack changed since the page was opened', function () {
+    ['pack' => $pack, 'cupItem' => $cupItem] = cupsAndLids();
+    $page = optionsPage($pack);
+    $sleeves = Catalog::product(['Unidades' => ['100']]);
+    $sleeveItem = $pack->items()->create(['product_id' => $sleeves->id, 'position' => 3]);
+    $sleeveItem->options()->create([
+        'product_option_id' => Catalog::option($sleeves, 'Unidades')->id,
+        'mode' => \Gongarce\ProductPacks\Enums\OptionMode::Fixed,
+        'product_option_value_id' => Catalog::value($sleeves, 'Unidades', '100')->id,
+    ]);
+
+    $page->call('saveRules');
+
+    expect($sleeveItem->options()->count())->toBe(1)
+        ->and($cupItem->options()->count())->toBe(1);
+});
+
+it('keeps unsaved options when saving the links', function () {
+    ['pack' => $pack, 'lids' => $lids, 'lidItem' => $lidItem] = cupsAndLids();
+
+    $page = optionsPage($pack)
+        ->fillForm([choiceField($lidItem, $lids, 'Unidades') => 'free'], 'rulesForm')
+        ->call('saveLinks');
+
+    expect($page->get('rules.'.choiceField($lidItem, $lids, 'Unidades')))->toBe('free');
+});
