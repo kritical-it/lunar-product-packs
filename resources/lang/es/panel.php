@@ -6,6 +6,7 @@ return [
     'untitled' => 'Pack sin productos',
     'cannot_publish' => 'El pack no se puede publicar hasta corregir estos errores:',
     'fields' => [
+        'shown_here' => 'Sale en esta ficha',
         'title' => 'Título',
         'title_help' => 'Opcional. Se muestra encima del pack en la ficha.',
         'status' => 'Estado',
@@ -21,6 +22,7 @@ return [
         'draft' => 'Borrador',
     ],
     'actions' => [
+        'create_with_product' => 'Crear pack con este producto',
         'add_item' => 'Añadir producto',
     ],
     'pages' => [

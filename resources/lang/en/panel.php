@@ -6,6 +6,7 @@ return [
     'untitled' => 'Pack without products',
     'cannot_publish' => 'The pack cannot be published until these errors are fixed:',
     'fields' => [
+        'shown_here' => 'Shown here',
         'title' => 'Title',
         'title_help' => 'Optional. Shown above the pack on the product page.',
         'status' => 'Status',
@@ -21,6 +22,7 @@ return [
         'draft' => 'Draft',
     ],
     'actions' => [
+        'create_with_product' => 'Create a pack with this product',
         'add_item' => 'Add product',
     ],
     'pages' => [
