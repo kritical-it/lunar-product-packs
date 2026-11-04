@@ -9,4 +9,8 @@ return [
     'incomplete_row' => 'A pair of a link lacks the value of one of its options.',
     'row_value_of_other_option' => 'A pair of a link has a value of another option.',
     'duplicate_row' => 'A link has the same pair twice.',
+    'linked_without_link' => 'A linked option is not in a link of its pack.',
+    'rule_with_wrong_fields' => 'A fixed option has a link, or a linked one a fixed value.',
+    'link_without_rows' => 'A link has no pairs: the pack could not be bought.',
+    'quantity_below_one' => 'The quantity of a product of the pack is below one.',
 ];

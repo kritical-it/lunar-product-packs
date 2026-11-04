@@ -54,3 +54,19 @@ it('adds nothing when one line fails', function () {
 
     expect($this->cart->fresh()->lines)->toHaveCount(0);
 });
+
+it('rejects a pack that is not published', function () {
+    $this->setup['pack']->update(['status' => \Gongarce\ProductPacks\Enums\PackStatus::Draft]);
+
+    expect(fn () => app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup)))
+        ->toThrow(InvalidArgumentException::class);
+});
+
+it('rejects a product left out of the pack', function () {
+    $this->setup['lids']->update(['status' => 'draft']);
+
+    expect(fn () => app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup)))
+        ->toThrow(InvalidArgumentException::class);
+
+    expect($this->cart->fresh()->lines)->toHaveCount(0);
+});

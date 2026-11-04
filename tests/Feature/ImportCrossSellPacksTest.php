@@ -67,3 +67,13 @@ it('keeps the cross-sell associations', function () {
 
     expect(ProductAssociation::count())->toBe(1);
 });
+
+it('skips a product associated with itself', function () {
+    [$a, $b] = [Catalog::product(), Catalog::product()];
+    crossSell($a, $a);
+    crossSell($a, $b);
+
+    $this->artisan('lunar:packs:import-cross-sell')->assertSuccessful();
+
+    expect(Pack::count())->toBe(1);
+});

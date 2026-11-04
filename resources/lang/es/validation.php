@@ -9,4 +9,8 @@ return [
     'incomplete_row' => 'A una pareja de un enlace le falta el valor de una de sus opciones.',
     'row_value_of_other_option' => 'Una pareja de un enlace tiene un valor de otra opción.',
     'duplicate_row' => 'Un enlace tiene la misma pareja dos veces.',
+    'linked_without_link' => 'Una opción enlazada no está en un enlace de su pack.',
+    'rule_with_wrong_fields' => 'Una opción fija tiene enlace, o una enlazada tiene valor fijo.',
+    'link_without_rows' => 'Un enlace no tiene parejas: el pack no se podría comprar.',
+    'quantity_below_one' => 'La cantidad de un producto del pack es menor que uno.',
 ];

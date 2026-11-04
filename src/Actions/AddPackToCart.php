@@ -2,7 +2,9 @@
 
 namespace Gongarce\ProductPacks\Actions;
 
+use Gongarce\ProductPacks\Enums\PackStatus;
 use Gongarce\ProductPacks\Models\Pack;
+use Gongarce\ProductPacks\ProductPacks;
 use InvalidArgumentException;
 use Lunar\Models\Cart;
 use Lunar\Models\ProductVariant;
@@ -18,12 +20,17 @@ class AddPackToCart
      * @param  list<array{variantId: int, quantity: int}>  $lines
      * @param  array<string, mixed>  $meta  more meta for every line
      *
-     * @throws InvalidArgumentException a variant of a product outside the pack
+     * @throws InvalidArgumentException a pack not published, or a variant of a product the pack does not show
      * @throws \Lunar\Exceptions\Carts\CartException a line Lunar does not accept
      */
     public function execute(Cart $cart, Pack $pack, array $lines, array $meta = []): Cart
     {
-        $productIds = $pack->items()->pluck('product_id')->all();
+        if ($pack->status !== PackStatus::Published) {
+            throw new InvalidArgumentException("Pack {$pack->id} is not published.");
+        }
+
+        // Only the products the pack shows: published and not deleted.
+        $productIds = ProductPacks::visibleItems($pack->loadMissing('items.product'))->pluck('product_id')->all();
         $variants = ProductVariant::modelClass()::query()
             ->whereIn('id', array_column($lines, 'variantId'))
             ->get()
@@ -34,7 +41,7 @@ class AddPackToCart
             $variant = $variants->get($line['variantId']);
 
             if (! $variant || ! in_array($variant->product_id, $productIds, true)) {
-                throw new InvalidArgumentException("Variant {$line['variantId']} is not of a product of pack {$pack->id}.");
+                throw new InvalidArgumentException("Variant {$line['variantId']} is not of a product pack {$pack->id} shows.");
             }
 
             $purchasables[] = [

@@ -97,3 +97,24 @@ it('drops rows left incomplete by a deleted option value', function () {
         [Catalog::value($cups, 'Unidades', '1000')->id, Catalog::value($lids, 'Unidades', '1000')->id],
     ]);
 });
+
+it('leaves out a pack whose fixed value was deleted, instead of freeing the option', function () {
+    ['cups' => $cups, 'pack' => $pack, 'lidItem' => $lidItem] = cupsAndLids();
+    $mugs = Catalog::product(['Size' => ['S', 'L']]);
+    $mugItem = $pack->items()->create(['product_id' => $mugs->id, 'position' => 3]);
+    $large = Catalog::value($mugs, 'Size', 'L');
+    $mugItem->options()->create(['product_option_id' => Catalog::option($mugs, 'Size')->id, 'mode' => OptionMode::Fixed, 'product_option_value_id' => $large->id]);
+
+    $large->variants()->detach();
+    $large->delete();
+
+    expect($mugItem->options()->count())->toBe(1)
+        ->and(app(ProductPacks::class)->forProduct($cups))->toBeEmpty();
+});
+
+it('drops a linked rule whose link is not of its pack', function () {
+    ['cups' => $cups, 'cupItem' => $cupItem] = cupsAndLids();
+    $cupItem->options()->first()->update(['pack_link_id' => cupsAndLids()['link']->id]);
+
+    expect(definitionFor($cups)['items'][0]['options'])->toBe([]);
+});

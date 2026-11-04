@@ -33,8 +33,10 @@ class PackDefinition
             ->sortBy(fn (PackItem $item) => $item->product_id === $current->getKey() ? 0 : 1)
             ->values();
 
+        $linkIds = $pack->links->modelKeys();
         $rules = $items->flatMap(fn (PackItem $item) => $item->options
-            ->filter(fn (PackItemOption $rule) => $item->product->productOptions->contains($rule->product_option_id)))
+            ->filter(fn (PackItemOption $rule) => $item->product->productOptions->contains($rule->product_option_id)
+                && ($rule->mode !== OptionMode::Linked || in_array($rule->pack_link_id, $linkIds, true))))
             ->keyBy('id');
 
         return [

@@ -2,6 +2,7 @@
 
 namespace Gongarce\ProductPacks;
 
+use Gongarce\ProductPacks\Enums\OptionMode;
 use Gongarce\ProductPacks\Enums\PackStatus;
 use Gongarce\ProductPacks\Models\Pack;
 use Gongarce\ProductPacks\Models\PackItem;
@@ -43,8 +44,22 @@ class ProductPacks
             ->get()
             ->each(fn (Pack $pack) => $pack->setRelation('items', self::visibleItems($pack)))
             ->filter(fn (Pack $pack) => $pack->items->count() >= 2
-                && $pack->items->contains('product_id', $product->getKey()))
+                && $pack->items->contains('product_id', $product->getKey())
+                && ! self::hasFixedRuleWithoutValue($pack))
             ->values();
+    }
+
+    /**
+     * A fixed option whose value was deleted: the pack cannot offer what it
+     * said (a pack «of 1000» without its 1000), so it does not show.
+     */
+    private static function hasFixedRuleWithoutValue(Pack $pack): bool
+    {
+        return $pack->items->contains(fn (PackItem $item) => $item->options->contains(
+            fn ($rule) => $rule->mode === OptionMode::Fixed
+                && $rule->product_option_value_id === null
+                && $item->product->productOptions->contains($rule->product_option_id),
+        ));
     }
 
     /**

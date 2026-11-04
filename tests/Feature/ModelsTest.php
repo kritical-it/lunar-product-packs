@@ -40,7 +40,7 @@ it('does not allow the same product twice in a pack', function () {
     $pack->items()->create(['product_id' => $product->id, 'position' => 2]);
 })->throws(QueryException::class);
 
-it('drops the fixed values and row values of a deleted option value', function () {
+it('drops the row values and empties the fixed values of a deleted option value', function () {
     ['cups' => $cups, 'cupItem' => $cupItem] = cupsAndLids();
     $hundred = Catalog::value($cups, 'Unidades', '100');
 

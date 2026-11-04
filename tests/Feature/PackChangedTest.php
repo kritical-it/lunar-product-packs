@@ -84,3 +84,28 @@ it('reports a deleted pack once, with the products it had', function () {
 });
 
 it('normalizes the product ids', fn () => expect(PackChanged::normalizeIds([3, '1', null, '', 3]))->toBe([1, 3]));
+
+it('reports a pack built in one transaction once', function () {
+    fakePackEvents();
+
+    \Illuminate\Support\Facades\DB::transaction(fn () => cupsAndLids());
+
+    expect(packEvents())->toHaveCount(1)
+        ->and(packEvents()->first()->productIds)->toHaveCount(2);
+});
+
+it('forgets the changes of a rolled back transaction', function () {
+    ['pack' => $pack, 'cups' => $cups, 'lids' => $lids] = $this->setup;
+
+    try {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($pack) {
+            $pack->update(['status' => PackStatus::Draft]);
+            throw new RuntimeException('rollback');
+        });
+    } catch (RuntimeException) {
+    }
+    $pack->refresh()->update(['title' => ['en' => 'Renamed']]);
+
+    expect(packEvents())->toHaveCount(1)
+        ->and(packProductIds())->toBe(sorted($cups->id, $lids->id));
+});

@@ -38,8 +38,10 @@ return new class extends Migration
             $table->foreignId('pack_item_id')->constrained($this->prefix.'pack_items')->cascadeOnDelete();
             $table->foreignId('product_option_id')->constrained($this->prefix.'product_options')->cascadeOnDelete();
             $table->string('mode');
-            // The value of a fixed option: deleting it deletes the rule.
-            $table->foreignId('product_option_value_id')->nullable()->constrained($this->prefix.'product_option_values')->cascadeOnDelete();
+            // The value of a fixed option. Deleting it leaves the rule without
+            // value, so the pack stops showing (and the validator reports it)
+            // instead of offering the option freely.
+            $table->foreignId('product_option_value_id')->nullable()->constrained($this->prefix.'product_option_values')->nullOnDelete();
             $table->foreignId('pack_link_id')->nullable()->constrained($this->prefix.'pack_links')->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['pack_item_id', 'product_option_id']);

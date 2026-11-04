@@ -90,3 +90,32 @@ it('rejects two equal rows', function () {
 
     expect(errorsOf($pack))->toContain(__('product-packs::validation.duplicate_row'));
 });
+
+it('rejects a linked rule without a link of its pack', function () {
+    ['pack' => $pack, 'cupItem' => $cupItem] = cupsAndLids();
+    $otherLink = cupsAndLids()['link'];
+    $cupItem->options()->first()->update(['pack_link_id' => $otherLink->id]);
+
+    expect(errorsOf($pack))->toContain(__('product-packs::validation.linked_without_link'));
+});
+
+it('rejects a rule with the field of the other mode', function () {
+    ['pack' => $pack, 'cups' => $cups, 'cupItem' => $cupItem] = cupsAndLids();
+    $cupItem->options()->first()->update(['product_option_value_id' => Catalog::value($cups, 'Unidades', '100')->id]);
+
+    expect(errorsOf($pack))->toContain(__('product-packs::validation.rule_with_wrong_fields'));
+});
+
+it('rejects a link without pairs', function () {
+    ['pack' => $pack, 'link' => $link] = cupsAndLids();
+    $link->rows()->each(fn ($row) => $row->delete());
+
+    expect(errorsOf($pack))->toContain(__('product-packs::validation.link_without_rows'));
+});
+
+it('rejects a quantity below one', function () {
+    ['pack' => $pack, 'cupItem' => $cupItem] = cupsAndLids();
+    $cupItem->update(['quantity' => 0]);
+
+    expect(errorsOf($pack))->toContain(__('product-packs::validation.quantity_below_one'));
+});

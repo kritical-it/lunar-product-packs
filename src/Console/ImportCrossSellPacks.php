@@ -65,6 +65,10 @@ class ImportCrossSellPacks extends Command
             ->get(['product_parent_id', 'product_target_id'])
             ->each(function ($association) use (&$pairs) {
                 [$parent, $target] = [$association->product_parent_id, $association->product_target_id];
+
+                if ($parent === $target) {
+                    return;
+                }
                 $key = self::key($parent, $target);
 
                 if (isset($pairs[$key])) {

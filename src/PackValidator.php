@@ -32,8 +32,14 @@ class PackValidator
             $errors[] = 'fewer_than_two_items';
         }
 
+        $linkIds = $pack->links->modelKeys();
+
         foreach ($pack->items as $item) {
             $optionIds = $item->product?->productOptions->modelKeys() ?? [];
+
+            if ($item->quantity < 1) {
+                $errors[] = 'quantity_below_one';
+            }
 
             foreach ($item->options as $rule) {
                 if (! in_array($rule->product_option_id, $optionIds, true)) {
@@ -42,6 +48,15 @@ class PackValidator
 
                 if ($rule->mode === OptionMode::Fixed && $rule->value?->product_option_id !== $rule->product_option_id) {
                     $errors[] = 'fixed_value_of_other_option';
+                }
+
+                if ($rule->mode === OptionMode::Linked && ! in_array($rule->pack_link_id, $linkIds, true)) {
+                    $errors[] = 'linked_without_link';
+                }
+
+                if (($rule->mode === OptionMode::Fixed && $rule->pack_link_id !== null)
+                    || ($rule->mode === OptionMode::Linked && $rule->product_option_value_id !== null)) {
+                    $errors[] = 'rule_with_wrong_fields';
                 }
             }
         }
@@ -70,6 +85,10 @@ class PackValidator
 
         if ($columns->pluck('pack_item_id')->duplicates()->isNotEmpty()) {
             $errors[] = 'link_columns_of_same_item';
+        }
+
+        if ($link->rows->isEmpty()) {
+            $errors[] = 'link_without_rows';
         }
 
         $columnOptions = $columns->mapWithKeys(fn (PackItemOption $column) => [$column->id => $column->product_option_id]);
