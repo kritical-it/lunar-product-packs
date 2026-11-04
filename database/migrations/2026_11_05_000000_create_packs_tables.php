@@ -58,7 +58,8 @@ return new class extends Migration
             $table->foreignId('pack_item_option_id')->constrained($this->prefix.'pack_item_options')->cascadeOnDelete();
             $table->foreignId('product_option_value_id')->constrained($this->prefix.'product_option_values')->cascadeOnDelete();
             $table->timestamps();
-            $table->unique(['pack_link_row_id', 'pack_item_option_id']);
+            // Named: the default name is longer than the 64 characters of MySQL.
+            $table->unique(['pack_link_row_id', 'pack_item_option_id'], $this->prefix.'pack_row_values_unique');
         });
     }
 
