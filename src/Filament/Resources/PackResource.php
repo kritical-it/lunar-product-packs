@@ -186,6 +186,7 @@ class PackResource extends Resource
     {
         return $page->generateNavigationItems([
             Pages\EditPack::class,
+            Pages\ManagePackOptions::class,
         ]);
     }
 
@@ -195,6 +196,7 @@ class PackResource extends Resource
             'index' => Pages\ListPacks::route('/'),
             'create' => Pages\CreatePack::route('/create'),
             'edit' => Pages\EditPack::route('/{record}/edit'),
+            'options' => Pages\ManagePackOptions::route('/{record}/options'),
         ];
     }
 }

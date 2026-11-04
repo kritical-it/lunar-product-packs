@@ -25,5 +25,21 @@ return [
     ],
     'pages' => [
         'edit' => 'Pack',
+        'options' => 'Options and links',
+    ],
+    'options' => [
+        'no_options' => 'No options.',
+        'free' => 'Free',
+        'fixed' => 'Fixed',
+        'link' => 'Link :letter',
+        'value' => 'Value',
+        'propose' => 'Propose pairs by name',
+        'add_row' => 'Add pair',
+        'proposed' => '{1} :count pair proposed: review it and save.|[2,*] :count pairs proposed: review them and save.',
+        'proposed_none' => 'No values with the same name to pair.',
+        'errors' => 'This pack has errors:',
+        'errors_published' => 'This pack is published with errors: it may show incomplete on the product page.',
+        'save_rules' => 'Save options',
+        'save_links' => 'Save links',
     ],
 ];

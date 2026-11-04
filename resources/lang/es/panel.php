@@ -25,5 +25,21 @@ return [
     ],
     'pages' => [
         'edit' => 'Pack',
+        'options' => 'Opciones y enlaces',
+    ],
+    'options' => [
+        'no_options' => 'Sin opciones.',
+        'free' => 'Libre',
+        'fixed' => 'Fija',
+        'link' => 'Enlace :letter',
+        'value' => 'Valor',
+        'propose' => 'Proponer parejas por nombre',
+        'add_row' => 'Añadir pareja',
+        'proposed' => '{1} :count pareja propuesta: revísala y guarda.|[2,*] :count parejas propuestas: revísalas y guarda.',
+        'proposed_none' => 'No hay valores que se llamen igual para emparejar.',
+        'errors' => 'Este pack tiene errores:',
+        'errors_published' => 'Este pack está publicado con errores: puede verse incompleto en la ficha.',
+        'save_rules' => 'Guardar opciones',
+        'save_links' => 'Guardar enlaces',
     ],
 ];
