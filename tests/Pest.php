@@ -31,3 +31,32 @@ function cupsAndLids(): array
 
     return compact('cups', 'lids', 'pack', 'cupItem', 'lidItem', 'link');
 }
+
+/**
+ * Only fake the plugin event: Eloquent model events must keep running.
+ */
+function fakePackEvents(): void
+{
+    \Illuminate\Support\Facades\Event::fake([\Gongarce\ProductPacks\Events\PackChanged::class]);
+}
+
+/**
+ * @return \Illuminate\Support\Collection<int, \Gongarce\ProductPacks\Events\PackChanged>
+ */
+function packEvents(?\Gongarce\ProductPacks\Events\PackChangeReason $reason = null)
+{
+    return \Illuminate\Support\Facades\Event::dispatched(\Gongarce\ProductPacks\Events\PackChanged::class)
+        ->map(fn (array $args) => $args[0])
+        ->filter(fn ($event) => $reason === null || $event->reason === $reason)
+        ->values();
+}
+
+/**
+ * Union of the product ids of every dispatched event, optionally by reason.
+ *
+ * @return list<int>
+ */
+function packProductIds(?\Gongarce\ProductPacks\Events\PackChangeReason $reason = null): array
+{
+    return \Gongarce\ProductPacks\Events\PackChanged::normalizeIds(packEvents($reason)->flatMap(fn ($event) => $event->productIds));
+}

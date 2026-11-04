@@ -3,6 +3,7 @@
 namespace Gongarce\ProductPacks;
 
 use Gongarce\ProductPacks\Models\PackItem;
+use Gongarce\ProductPacks\Observers\PackChanges;
 use Illuminate\Support\ServiceProvider;
 use Lunar\Facades\ModelManifest;
 use Lunar\Models\Product;
@@ -29,5 +30,7 @@ class ProductPacksServiceProvider extends ServiceProvider
         Product::resolveRelationUsing('packItems', fn (Product $product) => $product->hasMany(PackItem::modelClass()));
 
         ModelManifest::addDirectory(__DIR__.'/Models');
+
+        PackChanges::register();
     }
 }
