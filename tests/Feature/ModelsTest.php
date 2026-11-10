@@ -1,6 +1,5 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\OptionMode;
 use Gongarce\ProductPacks\Enums\PackStatus;
 use Gongarce\ProductPacks\Models\Pack;
 use Gongarce\ProductPacks\Models\PackItem;

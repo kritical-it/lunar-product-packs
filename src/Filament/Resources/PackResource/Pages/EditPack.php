@@ -4,8 +4,8 @@ namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Gongarce\ProductPacks\Enums\PackStatus;
 use Gongarce\ProductPacks\Editing\PackEditor;
+use Gongarce\ProductPacks\Enums\PackStatus;
 use Gongarce\ProductPacks\Filament\Resources\PackResource;
 
 class EditPack extends EditRecord

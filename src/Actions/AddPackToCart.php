@@ -3,16 +3,20 @@
 namespace Gongarce\ProductPacks\Actions;
 
 use Gongarce\ProductPacks\Enums\PackStatus;
+use Gongarce\ProductPacks\Exceptions\PackLineRejected;
+use Gongarce\ProductPacks\Exceptions\PackNotAvailable;
+use Gongarce\ProductPacks\Exceptions\PackProductNotAvailable;
 use Gongarce\ProductPacks\Models\Pack;
 use Gongarce\ProductPacks\ProductPacks;
-use InvalidArgumentException;
+use Illuminate\Support\Facades\DB;
+use Lunar\Exceptions\Carts\CartException;
 use Lunar\Models\Cart;
 use Lunar\Models\ProductVariant;
 
 /**
- * Add the chosen lines of a pack to a cart, all or none: Lunar adds them in
- * one transaction (Cart::addLines), so a line that fails its validation
- * (stock, quantity) adds nothing.
+ * Add the chosen lines of a pack to a cart, all or none: in one transaction,
+ * as Cart::addLines, so a line that fails its validation (stock, quantity)
+ * adds nothing; one by one, to tell which line failed (PackLineRejected).
  *
  * The lines carry no mark of the pack: a variant added from a pack goes to
  * the same line as when added from its page. A pack discount, when there is
@@ -24,13 +28,14 @@ class AddPackToCart
      * @param  list<array{variantId: int, quantity: int}>  $lines
      * @param  array<string, mixed>  $meta  more meta for every line
      *
-     * @throws InvalidArgumentException a pack not published, or a variant of a product the pack does not show
-     * @throws \Lunar\Exceptions\Carts\CartException a line Lunar does not accept
+     * @throws PackNotAvailable a pack not published
+     * @throws PackProductNotAvailable a variant of a product the pack does not show
+     * @throws PackLineRejected a line Lunar does not accept
      */
     public function execute(Cart $cart, Pack $pack, array $lines, array $meta = []): Cart
     {
         if ($pack->status !== PackStatus::Published) {
-            throw new InvalidArgumentException("Pack {$pack->id} is not published.");
+            throw new PackNotAvailable("Pack {$pack->id} is not published.");
         }
 
         // Only the products the pack shows: published and not deleted.
@@ -45,7 +50,7 @@ class AddPackToCart
             $variant = $variants->get($line['variantId']);
 
             if (! $variant || ! in_array($variant->product_id, $productIds, true)) {
-                throw new InvalidArgumentException("Variant {$line['variantId']} is not of a product pack {$pack->id} shows.");
+                throw new PackProductNotAvailable($line['variantId'], $pack->id);
             }
 
             $purchasables[] = [
@@ -55,6 +60,16 @@ class AddPackToCart
             ];
         }
 
-        return $cart->addLines($purchasables);
+        DB::transaction(function () use ($cart, $purchasables) {
+            foreach ($purchasables as $line) {
+                try {
+                    $cart->add($line['purchasable'], $line['quantity'], $line['meta'], refresh: false);
+                } catch (CartException $e) {
+                    throw new PackLineRejected($e, $line['purchasable'], $line['quantity']);
+                }
+            }
+        });
+
+        return $cart->refresh()->recalculate();
     }
 }

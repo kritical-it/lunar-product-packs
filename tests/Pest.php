@@ -74,4 +74,3 @@ function packWith(array $products, \Gongarce\ProductPacks\Enums\PackStatus $stat
 
     return $pack;
 }
-

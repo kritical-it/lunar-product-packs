@@ -1,7 +1,6 @@
 <?php
 
 use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Models\PackItemOption;
 use Gongarce\ProductPacks\PackDefinition;
 use Gongarce\ProductPacks\ProductPacks;
 use Gongarce\ProductPacks\Tests\Fixtures\Catalog;

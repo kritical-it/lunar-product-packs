@@ -1,6 +1,9 @@
 <?php
 
 use Gongarce\ProductPacks\Actions\AddPackToCart;
+use Gongarce\ProductPacks\Exceptions\PackLineRejected;
+use Gongarce\ProductPacks\Exceptions\PackNotAvailable;
+use Gongarce\ProductPacks\Exceptions\PackProductNotAvailable;
 use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
 use Lunar\Exceptions\Carts\CartException;
 use Lunar\Models\Cart;
@@ -49,7 +52,7 @@ it('rejects a variant of a product outside the pack', function () {
     expect(fn () => app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], [
         ...linesOf($this->setup),
         ['variantId' => $other->variants->first()->id, 'quantity' => 1],
-    ]))->toThrow(InvalidArgumentException::class);
+    ]))->toThrow(PackProductNotAvailable::class);
 
     expect($this->cart->fresh()->lines)->toHaveCount(0);
 });
@@ -63,18 +66,47 @@ it('adds nothing when one line fails', function () {
     expect($this->cart->fresh()->lines)->toHaveCount(0);
 });
 
+it('names the line that fails, and whether for its stock', function () {
+    $lid = $this->setup['lids']->variants->first();
+    $lid->update(['stock' => 2, 'backorder' => 0, 'purchasable' => 'in_stock']);
+
+    try {
+        app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup, 1, 5));
+        $this->fail('The pack was added');
+    } catch (PackLineRejected $e) {
+        expect($e->variant->id)->toBe($lid->id)
+            ->and($e->quantity)->toBe(5)
+            ->and($e->isStock())->toBeTrue();
+    }
+});
+
+it('tells a line refused by its quantity from one without stock', function () {
+    $lid = $this->setup['lids']->variants->first();
+    $lid->update(['quantity_increment' => 10]);
+
+    try {
+        app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup, 1, 5));
+        $this->fail('The pack was added');
+    } catch (PackLineRejected $e) {
+        expect($e->variant->id)->toBe($lid->id)
+            ->and($e->isStock())->toBeFalse();
+    }
+
+    expect($this->cart->fresh()->lines)->toHaveCount(0);
+});
+
 it('rejects a pack that is not published', function () {
     $this->setup['pack']->update(['status' => \Gongarce\ProductPacks\Enums\PackStatus::Draft]);
 
     expect(fn () => app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup)))
-        ->toThrow(InvalidArgumentException::class);
+        ->toThrow(PackNotAvailable::class);
 });
 
 it('rejects a product left out of the pack', function () {
     $this->setup['lids']->update(['status' => 'draft']);
 
     expect(fn () => app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup)))
-        ->toThrow(InvalidArgumentException::class);
+        ->toThrow(PackProductNotAvailable::class);
 
     expect($this->cart->fresh()->lines)->toHaveCount(0);
 });
