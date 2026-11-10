@@ -1,11 +1,11 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
+namespace KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages;
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
-use Gongarce\ProductPacks\Models\Pack;
 use Illuminate\Validation\ValidationException;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Models\Pack;
 
 /**
  * Publishing needs a pack without errors. Thrown inside the page's

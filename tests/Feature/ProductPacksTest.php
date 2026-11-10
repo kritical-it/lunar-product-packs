@@ -1,8 +1,8 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\ProductPacks;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\ProductPacks;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 
 function packIdsFor($product): array
 {

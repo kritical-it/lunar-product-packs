@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Enums;
+namespace KriticalIt\ProductPacks\Enums;
 
 enum PackStatus: string
 {

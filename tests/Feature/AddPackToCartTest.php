@@ -1,10 +1,10 @@
 <?php
 
-use Gongarce\ProductPacks\Actions\AddPackToCart;
-use Gongarce\ProductPacks\Exceptions\PackLineRejected;
-use Gongarce\ProductPacks\Exceptions\PackNotAvailable;
-use Gongarce\ProductPacks\Exceptions\PackProductNotAvailable;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Actions\AddPackToCart;
+use KriticalIt\ProductPacks\Exceptions\PackLineRejected;
+use KriticalIt\ProductPacks\Exceptions\PackNotAvailable;
+use KriticalIt\ProductPacks\Exceptions\PackProductNotAvailable;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Lunar\Exceptions\Carts\CartException;
 use Lunar\Models\Cart;
 use Lunar\Models\Channel;
@@ -96,7 +96,7 @@ it('tells a line refused by its quantity from one without stock', function () {
 });
 
 it('rejects a pack that is not published', function () {
-    $this->setup['pack']->update(['status' => \Gongarce\ProductPacks\Enums\PackStatus::Draft]);
+    $this->setup['pack']->update(['status' => \KriticalIt\ProductPacks\Enums\PackStatus::Draft]);
 
     expect(fn () => app(AddPackToCart::class)->execute($this->cart, $this->setup['pack'], linesOf($this->setup)))
         ->toThrow(PackNotAvailable::class);

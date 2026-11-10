@@ -1,14 +1,14 @@
 <?php
 
-namespace Gongarce\ProductPacks;
+namespace KriticalIt\ProductPacks;
 
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
-use Gongarce\ProductPacks\Models\PackItemOption;
-use Gongarce\ProductPacks\Models\PackLink;
-use Gongarce\ProductPacks\Models\PackLinkRow;
 use Illuminate\Support\Collection;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Models\PackItemOption;
+use KriticalIt\ProductPacks\Models\PackLink;
+use KriticalIt\ProductPacks\Models\PackLinkRow;
 use Lunar\Models\Product;
 
 /**

@@ -2,8 +2,8 @@
 
 use Filament\Facades\Filament;
 use Filament\Panel;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
-use Gongarce\ProductPacks\ProductPacksPlugin;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\ProductPacksPlugin;
 
 it('registers the pack resource in the lunar panel', function () {
     expect(Filament::getPanel('lunar')->getResources())->toContain(PackResource::class);

@@ -1,9 +1,9 @@
 <?php
 
-namespace Gongarce\ProductPacks\Database\Factories;
+namespace KriticalIt\ProductPacks\Database\Factories;
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PackFactory extends Factory

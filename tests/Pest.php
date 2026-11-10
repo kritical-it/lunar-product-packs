@@ -1,13 +1,13 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
-use Gongarce\ProductPacks\Tests\TestCase;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
-uses(\Gongarce\ProductPacks\Tests\LongPrefixTestCase::class)->in('Prefixed');
+uses(\KriticalIt\ProductPacks\Tests\LongPrefixTestCase::class)->in('Prefixed');
 
 /**
  * Cups and lids linked by units, 100 ↔ 100 and 1000 ↔ 1000.
@@ -38,15 +38,15 @@ function cupsAndLids(): array
  */
 function fakePackEvents(): void
 {
-    \Illuminate\Support\Facades\Event::fake([\Gongarce\ProductPacks\Events\PackChanged::class]);
+    \Illuminate\Support\Facades\Event::fake([\KriticalIt\ProductPacks\Events\PackChanged::class]);
 }
 
 /**
- * @return \Illuminate\Support\Collection<int, \Gongarce\ProductPacks\Events\PackChanged>
+ * @return \Illuminate\Support\Collection<int, \KriticalIt\ProductPacks\Events\PackChanged>
  */
-function packEvents(?\Gongarce\ProductPacks\Events\PackChangeReason $reason = null)
+function packEvents(?\KriticalIt\ProductPacks\Events\PackChangeReason $reason = null)
 {
-    return \Illuminate\Support\Facades\Event::dispatched(\Gongarce\ProductPacks\Events\PackChanged::class)
+    return \Illuminate\Support\Facades\Event::dispatched(\KriticalIt\ProductPacks\Events\PackChanged::class)
         ->map(fn (array $args) => $args[0])
         ->filter(fn ($event) => $reason === null || $event->reason === $reason)
         ->values();
@@ -57,17 +57,17 @@ function packEvents(?\Gongarce\ProductPacks\Events\PackChangeReason $reason = nu
  *
  * @return list<int>
  */
-function packProductIds(?\Gongarce\ProductPacks\Events\PackChangeReason $reason = null): array
+function packProductIds(?\KriticalIt\ProductPacks\Events\PackChangeReason $reason = null): array
 {
-    return \Gongarce\ProductPacks\Events\PackChanged::normalizeIds(packEvents($reason)->flatMap(fn ($event) => $event->productIds));
+    return \KriticalIt\ProductPacks\Events\PackChanged::normalizeIds(packEvents($reason)->flatMap(fn ($event) => $event->productIds));
 }
 
 /**
  * A pack with the given products, in that order, and no rules.
  */
-function packWith(array $products, \Gongarce\ProductPacks\Enums\PackStatus $status = \Gongarce\ProductPacks\Enums\PackStatus::Draft): \Gongarce\ProductPacks\Models\Pack
+function packWith(array $products, \KriticalIt\ProductPacks\Enums\PackStatus $status = \KriticalIt\ProductPacks\Enums\PackStatus::Draft): \KriticalIt\ProductPacks\Models\Pack
 {
-    $pack = \Gongarce\ProductPacks\Models\Pack::create(['status' => $status]);
+    $pack = \KriticalIt\ProductPacks\Models\Pack::create(['status' => $status]);
     foreach ($products as $i => $product) {
         $pack->items()->create(['product_id' => $product->id, 'position' => $i + 1]);
     }

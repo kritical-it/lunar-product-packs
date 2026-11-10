@@ -1,8 +1,8 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Extensions;
+namespace KriticalIt\ProductPacks\Filament\Extensions;
 
-use Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks;
+use KriticalIt\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks;
 use Lunar\Admin\Support\Extending\ResourceExtension;
 
 /**

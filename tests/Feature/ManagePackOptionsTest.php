@@ -1,9 +1,9 @@
 <?php
 
 use Filament\Facades\Filament;
-use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\ManagePackOptions;
-use Gongarce\ProductPacks\Models\PackLinkRow;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages\ManagePackOptions;
+use KriticalIt\ProductPacks\Models\PackLinkRow;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -111,7 +111,7 @@ it('refuses to save the rules of a pack changed since the page was opened', func
     $sleeveItem = $pack->items()->create(['product_id' => $sleeves->id, 'position' => 3]);
     $sleeveItem->options()->create([
         'product_option_id' => Catalog::option($sleeves, 'Unidades')->id,
-        'mode' => \Gongarce\ProductPacks\Enums\OptionMode::Fixed,
+        'mode' => \KriticalIt\ProductPacks\Enums\OptionMode::Fixed,
         'product_option_value_id' => Catalog::value($sleeves, 'Unidades', '100')->id,
     ]);
 

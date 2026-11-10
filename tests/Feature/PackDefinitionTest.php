@@ -1,9 +1,9 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\PackDefinition;
-use Gongarce\ProductPacks\ProductPacks;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\PackDefinition;
+use KriticalIt\ProductPacks\ProductPacks;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Lunar\Models\Product;
 
 function definitionFor(Product $current): array

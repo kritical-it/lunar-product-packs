@@ -2,13 +2,13 @@
 
 use Filament\Facades\Filament;
 use Filament\Tables\Actions\DeleteAction;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Events\PackChangeReason;
-use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\CreatePack;
-use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\EditPack;
-use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages\ListPacks;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Events\PackChangeReason;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages\CreatePack;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages\EditPack;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages\ListPacks;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -171,7 +171,7 @@ it('forbids staff without the permission to manage products', function () {
     ]);
     $this->actingAs($staff, 'staff');
 
-    expect(\Gongarce\ProductPacks\Filament\Resources\PackResource::canViewAny())->toBeFalse();
+    expect(\KriticalIt\ProductPacks\Filament\Resources\PackResource::canViewAny())->toBeFalse();
 });
 
 /**
@@ -204,13 +204,13 @@ it('lists the packs of a product with the same queries for one or ten', function
     $make = fn () => packWith([$cups, Catalog::product(['Unidades' => ['100']])]);
     $params = ['record' => $cups->getRouteKey()];
 
-    $one = queriesToList(\Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks::class, $params, 1, $make);
-    $ten = queriesToList(\Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks::class, $params, 9, $make);
+    $one = queriesToList(\KriticalIt\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks::class, $params, 1, $make);
+    $ten = queriesToList(\KriticalIt\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks::class, $params, 9, $make);
 
     expect($ten - $one)->toBeLessThan(5);
 });
 
 it('puts the pack pages menu on the right, like the products', function () {
-    expect(\Gongarce\ProductPacks\Filament\Resources\PackResource::getSubNavigationPosition())
+    expect(\KriticalIt\ProductPacks\Filament\Resources\PackResource::getSubNavigationPosition())
         ->toBe(\Lunar\Admin\Filament\Resources\ProductResource::getSubNavigationPosition());
 });

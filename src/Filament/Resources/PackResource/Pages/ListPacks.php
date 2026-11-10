@@ -1,10 +1,10 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
+namespace KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
 
 class ListPacks extends ListRecords
 {

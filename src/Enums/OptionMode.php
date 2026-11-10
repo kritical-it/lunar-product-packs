@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Enums;
+namespace KriticalIt\ProductPacks\Enums;
 
 /**
  * How a pack sets an option of one of its products. An option with no rule is

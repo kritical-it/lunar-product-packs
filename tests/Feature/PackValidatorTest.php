@@ -1,10 +1,10 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\PackValidator;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\PackValidator;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Lunar\Models\ProductOption;
 
 function errorsOf(Pack $pack): array

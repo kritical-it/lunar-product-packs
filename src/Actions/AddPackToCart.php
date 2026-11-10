@@ -1,14 +1,14 @@
 <?php
 
-namespace Gongarce\ProductPacks\Actions;
+namespace KriticalIt\ProductPacks\Actions;
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Exceptions\PackLineRejected;
-use Gongarce\ProductPacks\Exceptions\PackNotAvailable;
-use Gongarce\ProductPacks\Exceptions\PackProductNotAvailable;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\ProductPacks;
 use Illuminate\Support\Facades\DB;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Exceptions\PackLineRejected;
+use KriticalIt\ProductPacks\Exceptions\PackNotAvailable;
+use KriticalIt\ProductPacks\Exceptions\PackProductNotAvailable;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\ProductPacks;
 use Lunar\Exceptions\Carts\CartException;
 use Lunar\Models\Cart;
 use Lunar\Models\ProductVariant;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Tests;
+namespace KriticalIt\ProductPacks\Tests;
 
 /**
  * The tables with a long prefix: 30 characters.

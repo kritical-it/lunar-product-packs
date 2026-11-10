@@ -1,12 +1,12 @@
 <?php
 
-namespace Gongarce\ProductPacks;
+namespace KriticalIt\ProductPacks;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Filament\Support\Facades\FilamentIcon;
-use Gongarce\ProductPacks\Filament\Extensions\ProductPacksExtension;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Filament\Extensions\ProductPacksExtension;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
 use Lunar\Admin\Filament\Resources\ProductResource;
 use Lunar\Admin\Support\Facades\LunarPanel;
 

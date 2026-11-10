@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
+namespace KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -8,18 +8,18 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
-use Gongarce\ProductPacks\Editing\PackEditor;
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
-use Gongarce\ProductPacks\Models\PackItemOption;
-use Gongarce\ProductPacks\Models\PackLink;
-use Gongarce\ProductPacks\Models\PackLinkRow;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use KriticalIt\ProductPacks\Editing\PackEditor;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Models\PackItemOption;
+use KriticalIt\ProductPacks\Models\PackLink;
+use KriticalIt\ProductPacks\Models\PackLinkRow;
 use Lunar\Models\ProductOption;
 use Lunar\Models\ProductOptionValue;
 

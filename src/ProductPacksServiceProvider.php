@@ -1,11 +1,11 @@
 <?php
 
-namespace Gongarce\ProductPacks;
+namespace KriticalIt\ProductPacks;
 
-use Gongarce\ProductPacks\Console\ImportCrossSellPacks;
-use Gongarce\ProductPacks\Models\PackItem;
-use Gongarce\ProductPacks\Observers\PackChanges;
 use Illuminate\Support\ServiceProvider;
+use KriticalIt\ProductPacks\Console\ImportCrossSellPacks;
+use KriticalIt\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Observers\PackChanges;
 use Lunar\Facades\ModelManifest;
 use Lunar\Models\Product;
 

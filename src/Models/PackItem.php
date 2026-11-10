@@ -1,11 +1,11 @@
 <?php
 
-namespace Gongarce\ProductPacks\Models;
+namespace KriticalIt\ProductPacks\Models;
 
-use Gongarce\ProductPacks\Database\Factories\PackItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use KriticalIt\ProductPacks\Database\Factories\PackItemFactory;
 use Lunar\Base\BaseModel;
 use Lunar\Models\Product;
 

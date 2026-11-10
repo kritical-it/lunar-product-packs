@@ -1,13 +1,13 @@
 <?php
 
-namespace Gongarce\ProductPacks;
+namespace KriticalIt\ProductPacks;
 
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
 use Lunar\Models\Product;
 
 /**

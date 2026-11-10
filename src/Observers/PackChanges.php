@@ -1,19 +1,19 @@
 <?php
 
-namespace Gongarce\ProductPacks\Observers;
+namespace KriticalIt\ProductPacks\Observers;
 
-use Gongarce\ProductPacks\Events\PackChanged;
-use Gongarce\ProductPacks\Events\PackChangeReason;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
-use Gongarce\ProductPacks\Models\PackItemOption;
-use Gongarce\ProductPacks\Models\PackLink;
-use Gongarce\ProductPacks\Models\PackLinkRow;
-use Gongarce\ProductPacks\Models\PackLinkRowValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\TransactionRolledBack;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use KriticalIt\ProductPacks\Events\PackChanged;
+use KriticalIt\ProductPacks\Events\PackChangeReason;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Models\PackItemOption;
+use KriticalIt\ProductPacks\Models\PackLink;
+use KriticalIt\ProductPacks\Models\PackLinkRow;
+use KriticalIt\ProductPacks\Models\PackLinkRowValue;
 
 /**
  * Dispatches PackChanged from the model events of every table of a pack.

@@ -1,12 +1,12 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
+namespace KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use Gongarce\ProductPacks\Editing\PackEditor;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use KriticalIt\ProductPacks\Editing\PackEditor;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
 
 class CreatePack extends CreateRecord
 {

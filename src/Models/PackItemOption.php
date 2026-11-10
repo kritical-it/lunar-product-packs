@@ -1,9 +1,9 @@
 <?php
 
-namespace Gongarce\ProductPacks\Models;
+namespace KriticalIt\ProductPacks\Models;
 
-use Gongarce\ProductPacks\Enums\OptionMode;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use KriticalIt\ProductPacks\Enums\OptionMode;
 use Lunar\Base\BaseModel;
 use Lunar\Models\ProductOption;
 use Lunar\Models\ProductOptionValue;

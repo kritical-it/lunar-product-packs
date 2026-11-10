@@ -1,10 +1,10 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Events\PackChanged;
-use Gongarce\ProductPacks\Events\PackChangeReason;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Events\PackChanged;
+use KriticalIt\ProductPacks\Events\PackChangeReason;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 
 function sorted(int ...$ids): array
 {

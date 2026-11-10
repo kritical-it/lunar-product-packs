@@ -1,9 +1,9 @@
 <?php
 
-namespace Gongarce\ProductPacks\Tests;
+namespace KriticalIt\ProductPacks\Tests;
 
-use Gongarce\ProductPacks\ProductPacksServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use KriticalIt\ProductPacks\ProductPacksServiceProvider;
 use Lunar\Admin\Models\Staff;
 use Lunar\Models\Currency;
 use Lunar\Models\Language;

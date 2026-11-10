@@ -1,12 +1,12 @@
 <?php
 
-namespace Gongarce\ProductPacks\Models;
+namespace KriticalIt\ProductPacks\Models;
 
-use Gongarce\ProductPacks\Database\Factories\PackFactory;
-use Gongarce\ProductPacks\Enums\PackStatus;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use KriticalIt\ProductPacks\Database\Factories\PackFactory;
+use KriticalIt\ProductPacks\Enums\PackStatus;
 use Lunar\Base\BaseModel;
 use Lunar\Base\Traits\HasTranslations;
 

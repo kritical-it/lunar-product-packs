@@ -1,9 +1,9 @@
 <?php
 
 use Filament\Facades\Filament;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
-use Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Filament\Resources\ProductResource\Pages\ManageProductPacks;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Livewire\Livewire;
 
 beforeEach(function () {

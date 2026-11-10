@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Events;
+namespace KriticalIt\ProductPacks\Events;
 
 enum PackChangeReason: string
 {

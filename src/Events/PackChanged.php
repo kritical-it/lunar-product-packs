@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Events;
+namespace KriticalIt\ProductPacks\Events;
 
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;

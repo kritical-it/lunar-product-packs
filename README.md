@@ -30,7 +30,7 @@ its cached pages.
 ## Installation
 
 ```bash
-composer require gongarce/lunar-product-packs
+composer require kriticalit/lunar-product-packs
 php artisan migrate
 ```
 
@@ -41,7 +41,7 @@ prefix (`lunar_packs`, `lunar_pack_items`…).
 Then register the plugin in the Lunar panel:
 
 ```php
-use Gongarce\ProductPacks\ProductPacksPlugin;
+use KriticalIt\ProductPacks\ProductPacksPlugin;
 use Lunar\Admin\Support\Facades\LunarPanel;
 
 public function register(): void
@@ -80,8 +80,8 @@ Managing packs takes the `catalog:manage-products` permission.
 ### Packs of a product page
 
 ```php
-use Gongarce\ProductPacks\PackDefinition;
-use Gongarce\ProductPacks\ProductPacks;
+use KriticalIt\ProductPacks\PackDefinition;
+use KriticalIt\ProductPacks\ProductPacks;
 
 $packs = app(ProductPacks::class)->forProduct($product);
 
@@ -133,7 +133,7 @@ some column.
 ### Adding a pack to the cart
 
 ```php
-use Gongarce\ProductPacks\Actions\AddPackToCart;
+use KriticalIt\ProductPacks\Actions\AddPackToCart;
 use Lunar\Facades\CartSession;
 
 app(AddPackToCart::class)->execute(CartSession::manager(), $pack, [
@@ -161,11 +161,11 @@ Lunar's `CartException`.
 ### Events
 
 Whenever what a page shows of a pack may have changed, the plugin dispatches
-`Gongarce\ProductPacks\Events\PackChanged` with the affected products. Products
+`KriticalIt\ProductPacks\Events\PackChanged` with the affected products. Products
 that were taken out of the pack are included, because their pages showed it.
 
 ```php
-use Gongarce\ProductPacks\Events\PackChanged;
+use KriticalIt\ProductPacks\Events\PackChanged;
 
 Event::listen(function (PackChanged $event) {
     $event->productIds; // list<int>: unique ids of every affected product

@@ -1,14 +1,14 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
-use Gongarce\ProductPacks\Models\PackItemOption;
-use Gongarce\ProductPacks\Models\PackLink;
-use Gongarce\ProductPacks\Models\PackLinkRow;
-use Gongarce\ProductPacks\Models\PackLinkRowValue;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
 use Illuminate\Database\QueryException;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Models\PackItemOption;
+use KriticalIt\ProductPacks\Models\PackLink;
+use KriticalIt\ProductPacks\Models\PackLinkRow;
+use KriticalIt\ProductPacks\Models\PackLinkRowValue;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 
 it('orders the items of a pack by position', function () {
     $pack = Pack::create(['status' => PackStatus::Draft]);

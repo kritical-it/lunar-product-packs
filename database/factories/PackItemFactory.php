@@ -1,9 +1,9 @@
 <?php
 
-namespace Gongarce\ProductPacks\Database\Factories;
+namespace KriticalIt\ProductPacks\Database\Factories;
 
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Lunar\Models\Product;
 

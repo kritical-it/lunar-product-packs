@@ -1,12 +1,12 @@
 <?php
 
-namespace Gongarce\ProductPacks\Console;
+namespace KriticalIt\ProductPacks\Console;
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
 use Lunar\Models\ProductAssociation;
 
 /**

@@ -1,9 +1,9 @@
 <?php
 
-namespace Gongarce\ProductPacks\Tests;
+namespace KriticalIt\ProductPacks\Tests;
 
-use Gongarce\ProductPacks\ProductPacksPlugin;
 use Illuminate\Support\ServiceProvider;
+use KriticalIt\ProductPacks\ProductPacksPlugin;
 use Lunar\Admin\Support\Facades\LunarPanel;
 
 class TestPanelServiceProvider extends ServiceProvider

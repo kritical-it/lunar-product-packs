@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Tests\Fixtures;
+namespace KriticalIt\ProductPacks\Tests\Fixtures;
 
 use Illuminate\Support\Arr;
 use Lunar\Models\Currency;

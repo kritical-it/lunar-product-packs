@@ -1,12 +1,12 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
+namespace KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Gongarce\ProductPacks\Editing\PackEditor;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Editing\PackEditor;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
 
 class EditPack extends EditRecord
 {

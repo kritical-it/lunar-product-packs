@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Models;
+namespace KriticalIt\ProductPacks\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Lunar\Base\BaseModel;

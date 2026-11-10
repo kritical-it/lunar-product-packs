@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources;
+namespace KriticalIt\ProductPacks\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -8,12 +8,12 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Filament\Resources\PackResource\Pages;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Models\PackItem;
-use Gongarce\ProductPacks\PackValidator;
 use Illuminate\Support\HtmlString;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource\Pages;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\PackValidator;
 use Lunar\Admin\Support\Forms\Components\TranslatedText;
 use Lunar\Admin\Support\Resources\BaseResource;
 use Lunar\Models\Contracts\Product as ProductContract;

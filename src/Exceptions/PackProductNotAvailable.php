@@ -1,6 +1,6 @@
 <?php
 
-namespace Gongarce\ProductPacks\Exceptions;
+namespace KriticalIt\ProductPacks\Exceptions;
 
 use InvalidArgumentException;
 

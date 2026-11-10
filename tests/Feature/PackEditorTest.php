@@ -1,12 +1,12 @@
 <?php
 
-use Gongarce\ProductPacks\Editing\PackEditor;
-use Gongarce\ProductPacks\Enums\OptionMode;
-use Gongarce\ProductPacks\Models\PackItemOption;
-use Gongarce\ProductPacks\Models\PackLink;
-use Gongarce\ProductPacks\Models\PackLinkRow;
-use Gongarce\ProductPacks\PackValidator;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Editing\PackEditor;
+use KriticalIt\ProductPacks\Enums\OptionMode;
+use KriticalIt\ProductPacks\Models\PackItemOption;
+use KriticalIt\ProductPacks\Models\PackLink;
+use KriticalIt\ProductPacks\Models\PackLinkRow;
+use KriticalIt\ProductPacks\PackValidator;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 
 /**
  * The rows of a link as [ruleId => valueId] maps, in order.

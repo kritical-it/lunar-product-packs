@@ -1,14 +1,14 @@
 <?php
 
-namespace Gongarce\ProductPacks\Filament\Resources\ProductResource\Pages;
+namespace KriticalIt\ProductPacks\Filament\Resources\ProductResource\Pages;
 
 use Filament\Actions\Action;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Filament\Resources\PackResource;
-use Gongarce\ProductPacks\Models\PackItem;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Filament\Resources\PackResource;
+use KriticalIt\ProductPacks\Models\PackItem;
 use Lunar\Admin\Filament\Resources\ProductResource;
 use Lunar\Admin\Support\Pages\BaseManageRelatedRecords;
 

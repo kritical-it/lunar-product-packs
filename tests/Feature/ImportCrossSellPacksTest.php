@@ -1,8 +1,8 @@
 <?php
 
-use Gongarce\ProductPacks\Enums\PackStatus;
-use Gongarce\ProductPacks\Models\Pack;
-use Gongarce\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use Lunar\Models\ProductAssociation;
 
 function crossSell($parent, $target): void

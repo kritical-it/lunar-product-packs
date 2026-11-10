@@ -1,5 +1,5 @@
 {
-  "name": "gongarce/lunar-product-packs",
+  "name": "kriticalit/lunar-product-packs",
   "description": "Product packs for Lunar: products bought together, with their quantities and linked options",
   "keywords": [
     "lunar",
@@ -21,8 +21,8 @@
   ],
   "autoload": {
     "psr-4": {
-      "Gongarce\\ProductPacks\\": "src",
-      "Gongarce\\ProductPacks\\Database\\Factories\\": "database/factories"
+      "KriticalIt\\ProductPacks\\": "src",
+      "KriticalIt\\ProductPacks\\Database\\Factories\\": "database/factories"
     }
   },
   "extra": {
@@ -31,7 +31,7 @@
     },
     "laravel": {
       "providers": [
-        "Gongarce\\ProductPacks\\ProductPacksServiceProvider"
+        "KriticalIt\\ProductPacks\\ProductPacksServiceProvider"
       ]
     }
   },
@@ -54,7 +54,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Gongarce\\ProductPacks\\Tests\\": "tests"
+      "KriticalIt\\ProductPacks\\Tests\\": "tests"
     }
   },
   "scripts": {
