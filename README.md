@@ -60,6 +60,36 @@ turned off without uninstalling it:
 LUNAR_PRODUCT_PACKS_ENABLED=false
 ```
 
+## Pack discounts
+
+A pack can take a percentage off the units of the cart that make complete
+packs. Install the discount once:
+
+```bash
+php artisan product-packs:install-discount
+```
+
+This creates the «Packs» discount. It has priority 0, so it applies last
+(after any coupon) and adds to what the line already has off. A customer
+group created later has to be attached to the «Packs» discount in the admin.
+
+To record the packs on the order and tag it `PACK`, add the pipeline after
+`MapDiscountBreakdown` in `config/lunar/orders.php`:
+
+```php
+'pipelines' => [
+    'creation' => [
+        // ...
+        Lunar\Pipelines\Order\Creation\MapDiscountBreakdown::class,
+        KriticalIt\ProductPacks\Pipelines\Order\Creation\MapPackDiscounts::class,
+    ],
+],
+```
+
+The order meta gets `pack_discounts`: a list of `pack_id`, `title`,
+`percentage`, `count` and `lines` (`purchasable_id`, `quantity`, `discount`
+in cents without tax). The other tags of the order are not touched.
+
 ## The admin
 
 - **Packs section**, under the catalog: list, create, edit and delete packs, with
