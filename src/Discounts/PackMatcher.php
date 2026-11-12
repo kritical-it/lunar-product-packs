@@ -58,20 +58,27 @@ class PackMatcher
             return null;
         }
 
+        $rules = $items->map(fn (PackItem $item) => $this->rules($item));
+
         // Lines of each item that follow its fixed values.
-        $candidates = $items->map(fn (PackItem $item) => $lines
+        $candidates = $items->map(fn (PackItem $item, int $i) => $lines
             ->where('productId', $item->product_id)
-            ->filter(fn (MatchLine $line) => $this->rules($item)
+            ->filter(fn (MatchLine $line) => $rules[$i]
                 ->every(fn (PackItemOption $rule) => $rule->mode !== OptionMode::Fixed
                     || in_array($rule->product_option_value_id, $line->valueIds, true)))
             ->values());
 
+        // The cart lacks a product of the pack: no combination can make one.
+        if ($items->contains(fn (PackItem $item, int $i) => $candidates[$i]->sum(fn (MatchLine $line) => $remaining[$line->id]) < $item->quantity)) {
+            return null;
+        }
+
         $count = 0;
         $units = [];
 
-        foreach ($this->combinations($pack, $items) as $combination) {
+        foreach ($this->combinations($pack, $rules) as $combination) {
             $eligible = $items->map(fn (PackItem $item, int $i) => $candidates[$i]
-                ->filter(fn (MatchLine $line) => $this->rules($item)
+                ->filter(fn (MatchLine $line) => $rules[$i]
                     ->every(fn (PackItemOption $rule) => $rule->mode !== OptionMode::Linked
                         || ! array_key_exists($rule->id, $combination)
                         || in_array($combination[$rule->id], $line->valueIds, true))));
@@ -121,12 +128,12 @@ class PackMatcher
      * columns ties nothing and adds no choice; one without usable rows leaves
      * no choice at all. A row without a value for some column is dropped.
      *
-     * @param  Collection<int, PackItem>  $items  the visible items
+     * @param  Collection<int, Collection<int, PackItemOption>>  $rules  the rules of each visible item
      * @return list<array<int, int>>
      */
-    private function combinations(Pack $pack, Collection $items): array
+    private function combinations(Pack $pack, Collection $rules): array
     {
-        $ruleIds = $items->flatMap(fn (PackItem $item) => $this->rules($item)->pluck('id'))->flip();
+        $ruleIds = $rules->flatMap(fn (Collection $itemRules) => $itemRules->pluck('id'))->flip();
 
         $perLink = [];
         foreach ($pack->links as $link) {
