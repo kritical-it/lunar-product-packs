@@ -15,6 +15,7 @@ use Lunar\Facades\Discounts;
 use Lunar\Facades\ModelManifest;
 use Lunar\Models\Channel;
 use Lunar\Models\CustomerGroup;
+use Lunar\Models\Discount;
 use Lunar\Models\Product;
 
 class ProductPacksServiceProvider extends ServiceProvider
@@ -55,6 +56,15 @@ class ProductPacksServiceProvider extends ServiceProvider
     private function registerDiscount(): void
     {
         Discounts::addType(PackDiscount::class);
+
+        // Priority 0 runs it after every other discount, so it adds to a coupon
+        // instead of making AmountOff skip or shrink it: forced on any record
+        // of this type, made by the command, the panel or a type change.
+        Discount::modelClass()::saving(function ($discount) {
+            if (is_a((string) $discount->type, PackDiscount::class, true)) {
+                $discount->priority = 0;
+            }
+        });
 
         // The packs loaded for this request are stale once one changes.
         Event::listen(PackChanged::class, fn () => $this->app->make(CartPackDiscounts::class)->forget());

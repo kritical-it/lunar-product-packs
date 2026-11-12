@@ -113,6 +113,33 @@ it('applies once with two records of its type', function () {
         ->and($cart->discountBreakdown)->toHaveCount(1);
 });
 
+it('runs after a coupon whatever the priority given to a record of its type', function () {
+    Discount::factory()->create([
+        'type' => AmountOff::class,
+        'coupon' => 'FIVE',
+        'data' => ['fixed_value' => false, 'percentage' => 5],
+        'starts_at' => now()->subDay(),
+    ]);
+    $other = Discount::factory()->create(['type' => PackDiscount::class, 'priority' => 10, 'starts_at' => now()->subDay()]);
+    $this->cart->update(['coupon_code' => 'FIVE']);
+
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+
+    expect($other->fresh()->priority)->toBe(0)
+        ->and(lineOf($cart, $this->cup)->discountTotal->value)->toBe(120)
+        ->and(lineOf($cart, $this->lid)->discountTotal->value)->toBe(120)
+        ->and($cart->discountTotal->value)->toBe(240);
+});
+
+it('keeps priority 0 when a record changes to its type', function () {
+    $discount = Discount::factory()->create(['type' => AmountOff::class, 'priority' => 5]);
+
+    $discount->update(['type' => PackDiscount::class, 'priority' => 3]);
+
+    expect($discount->fresh()->priority)->toBe(0);
+});
+
 it('adds a breakdown per pack', function () {
     $other = cupsAndLidsBySize();
     $other['pack']->update(['discount_percentage' => 10, 'discount_enabled' => true]);
