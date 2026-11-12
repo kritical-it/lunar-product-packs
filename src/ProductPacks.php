@@ -60,6 +60,7 @@ class ProductPacks
     {
         return Pack::modelClass()::query()
             ->where('status', PackStatus::Published)
+            ->where('discount_enabled', true)
             ->with(self::RELATIONS)
             ->orderBy('id')
             ->get()

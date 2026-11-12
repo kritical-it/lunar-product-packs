@@ -52,4 +52,8 @@ return [
         'save_rules' => 'Save options',
         'save_links' => 'Save links',
     ],
+    'discount' => [
+        'name' => 'Packs',
+        'help' => 'The % is set on each pack, in Packs.',
+    ],
 ];

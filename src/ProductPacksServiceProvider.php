@@ -2,11 +2,19 @@
 
 namespace KriticalIt\ProductPacks;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use KriticalIt\ProductPacks\Console\ImportCrossSellPacks;
+use KriticalIt\ProductPacks\Console\InstallPackDiscount;
+use KriticalIt\ProductPacks\Discounts\CartPackDiscounts;
+use KriticalIt\ProductPacks\Discounts\PackDiscount;
+use KriticalIt\ProductPacks\Events\PackChanged;
 use KriticalIt\ProductPacks\Models\PackItem;
 use KriticalIt\ProductPacks\Observers\PackChanges;
+use Lunar\Facades\Discounts;
 use Lunar\Facades\ModelManifest;
+use Lunar\Models\Channel;
+use Lunar\Models\CustomerGroup;
 use Lunar\Models\Product;
 
 class ProductPacksServiceProvider extends ServiceProvider
@@ -14,6 +22,8 @@ class ProductPacksServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/product-packs.php', 'lunar.product-packs');
+
+        $this->app->scoped(CartPackDiscounts::class);
     }
 
     public function boot(): void
@@ -35,8 +45,24 @@ class ProductPacksServiceProvider extends ServiceProvider
 
         PackChanges::register();
 
+        $this->registerDiscount();
+
         if ($this->app->runningInConsole()) {
-            $this->commands([ImportCrossSellPacks::class]);
+            $this->commands([ImportCrossSellPacks::class, InstallPackDiscount::class]);
         }
+    }
+
+    private function registerDiscount(): void
+    {
+        Discounts::addType(PackDiscount::class);
+
+        // The packs loaded for this request are stale once one changes.
+        Event::listen(PackChanged::class, fn () => $this->app->make(CartPackDiscounts::class)->forget());
+
+        // A channel or customer group created later gets the discount too.
+        Channel::modelClass()::created(fn ($channel) => PackDiscount::records()
+            ->each(fn ($discount) => PackDiscount::makeAvailable($discount, channels: collect([$channel]), groups: collect())));
+        CustomerGroup::modelClass()::created(fn ($group) => PackDiscount::records()
+            ->each(fn ($discount) => PackDiscount::makeAvailable($discount, channels: collect(), groups: collect([$group]))));
     }
 }
