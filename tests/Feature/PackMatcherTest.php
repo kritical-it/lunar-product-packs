@@ -8,6 +8,7 @@ use KriticalIt\ProductPacks\Enums\PackStatus;
 use KriticalIt\ProductPacks\Models\Pack;
 use KriticalIt\ProductPacks\ProductPacks;
 use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
+use Lunar\Models\Discount;
 use Lunar\Models\Product;
 use Lunar\Models\ProductOptionValue;
 use Lunar\Models\ProductVariant;
@@ -28,12 +29,25 @@ function discountedMatch(array $lines): array
     return (new PackMatcher)->match(collect($lines), (new ProductPacks)->discounted());
 }
 
+beforeEach(fn () => installPackDiscount());
+
 function discountPack(Pack $pack, float $percentage = 7.0): Pack
 {
     $pack->update(['discount_percentage' => $percentage, 'discount_enabled' => true]);
 
     return $pack;
 }
+
+it('matches nothing when the record of the discount has ended', function () {
+    ['cups' => $cups, 'lids' => $lids, 'pack' => $pack] = cupsAndLids();
+    discountPack($pack);
+    Discount::where('handle', 'product-packs')->sole()->update(['ends_at' => now()->subDay()]);
+
+    expect(discountedMatch([
+        cartLine(1, $cups, ['100'], 1),
+        cartLine(2, $lids, ['100'], 1),
+    ]))->toBe([]);
+});
 
 it('matches one pack for 3 cups and 1 lid', function () {
     ['cups' => $cups, 'lids' => $lids, 'pack' => $pack, 'cupItem' => $cupItem] = cupsAndLids();

@@ -70,8 +70,19 @@ php artisan product-packs:install-discount
 ```
 
 This creates the «Packs» discount. It has priority 0, so it applies last
-(after any coupon) and adds to what the line already has off. A customer
-group created later has to be attached to the «Packs» discount in the admin.
+(after any coupon) and adds to what the line already has off. Channels and
+customer groups created later are attached to it on creation; rerunning
+`product-packs:install-discount` attaches any that are missing and leaves the
+rest as they are.
+
+The % is set on each pack. The «Packs» record only switches the discount on
+or off for all of them: while no record of this type is active and usable
+(deactivated, scheduled, expired or out of uses), no cart applies it and the
+pack definitions send `discount: null`, so the product pages stop promising
+it. Product pages are usually cached, and a change of the «Packs» record does
+not fire `PackChanged`: after changing it, refresh the product pages (in
+Packea, the «Invalidar en la tienda» action). To remove the discount of one
+pack, turn it off in the pack.
 
 To record the packs on the order and tag it `PACK`, add the pipeline after
 `MapDiscountBreakdown` in `config/lunar/orders.php`:

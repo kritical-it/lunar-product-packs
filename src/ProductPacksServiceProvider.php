@@ -8,6 +8,7 @@ use KriticalIt\ProductPacks\Console\ImportCrossSellPacks;
 use KriticalIt\ProductPacks\Console\InstallPackDiscount;
 use KriticalIt\ProductPacks\Discounts\CartPackDiscounts;
 use KriticalIt\ProductPacks\Discounts\PackDiscount;
+use KriticalIt\ProductPacks\Discounts\PackDiscountRecord;
 use KriticalIt\ProductPacks\Events\PackChanged;
 use KriticalIt\ProductPacks\Models\PackItem;
 use KriticalIt\ProductPacks\Observers\PackChanges;
@@ -25,6 +26,7 @@ class ProductPacksServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/product-packs.php', 'lunar.product-packs');
 
         $this->app->scoped(CartPackDiscounts::class);
+        $this->app->scoped(PackDiscountRecord::class);
     }
 
     public function boot(): void
@@ -68,6 +70,14 @@ class ProductPacksServiceProvider extends ServiceProvider
 
         // The packs loaded for this request are stale once one changes.
         Event::listen(PackChanged::class, fn () => $this->app->make(CartPackDiscounts::class)->forget());
+
+        // The packs with a discount depend on the record of the discount.
+        $forgetRecord = function () {
+            $this->app->make(PackDiscountRecord::class)->forget();
+            $this->app->make(CartPackDiscounts::class)->forget();
+        };
+        Discount::modelClass()::saved($forgetRecord);
+        Discount::modelClass()::deleted($forgetRecord);
 
         // A channel or customer group created later gets the discount too.
         Channel::modelClass()::created(fn ($channel) => PackDiscount::records()

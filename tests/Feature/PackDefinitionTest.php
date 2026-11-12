@@ -4,6 +4,7 @@ use KriticalIt\ProductPacks\Enums\OptionMode;
 use KriticalIt\ProductPacks\PackDefinition;
 use KriticalIt\ProductPacks\ProductPacks;
 use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
+use Lunar\Models\Discount;
 use Lunar\Models\Product;
 
 function definitionFor(Product $current): array
@@ -119,10 +120,29 @@ it('drops a linked rule whose link is not of its pack', function () {
 });
 
 it('sends the discount when active', function () {
+    installPackDiscount();
     ['cups' => $cups, 'pack' => $pack] = cupsAndLids();
     $pack->update(['discount_percentage' => 7, 'discount_enabled' => true, 'discount_badge' => true]);
 
     expect(definitionFor($cups)['discount'])->toBe(['percentage' => 7.0, 'badge' => true]);
+});
+
+it('sends no discount when the record of the discount has ended', function () {
+    installPackDiscount();
+    ['cups' => $cups, 'pack' => $pack] = cupsAndLids();
+    $pack->update(['discount_percentage' => 7, 'discount_enabled' => true]);
+    expect(definitionFor($cups)['discount'])->not->toBeNull();
+
+    Discount::where('handle', 'product-packs')->sole()->update(['ends_at' => now()->subDay()]);
+
+    expect(definitionFor($cups)['discount'])->toBeNull();
+});
+
+it('sends no discount without a record of the discount', function () {
+    ['cups' => $cups, 'pack' => $pack] = cupsAndLids();
+    $pack->update(['discount_percentage' => 7, 'discount_enabled' => true]);
+
+    expect(definitionFor($cups)['discount'])->toBeNull();
 });
 
 it('sends no discount when disabled', function () {

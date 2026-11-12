@@ -4,6 +4,7 @@ namespace KriticalIt\ProductPacks;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use KriticalIt\ProductPacks\Discounts\PackDiscountRecord;
 use KriticalIt\ProductPacks\Enums\OptionMode;
 use KriticalIt\ProductPacks\Enums\PackStatus;
 use KriticalIt\ProductPacks\Models\Pack;
@@ -52,12 +53,17 @@ class ProductPacks
     /**
      * Published packs with an active discount, each with only its visible
      * products, two or more, and none with a fixed rule without value (as in
-     * forProduct). The highest percentage first, then by id.
+     * forProduct). The highest percentage first, then by id. None when no
+     * record of the PackDiscount type is active and usable.
      *
      * @return Collection<int, Pack>
      */
     public function discounted(): Collection
     {
+        if (! app(PackDiscountRecord::class)->usable()) {
+            return collect();
+        }
+
         return Pack::modelClass()::query()
             ->where('status', PackStatus::Published)
             ->where('discount_enabled', true)

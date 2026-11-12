@@ -3,6 +3,7 @@
 namespace KriticalIt\ProductPacks;
 
 use Illuminate\Support\Collection;
+use KriticalIt\ProductPacks\Discounts\PackDiscountRecord;
 use KriticalIt\ProductPacks\Enums\OptionMode;
 use KriticalIt\ProductPacks\Models\Pack;
 use KriticalIt\ProductPacks\Models\PackItem;
@@ -22,6 +23,8 @@ use Lunar\Models\Product;
  */
 class PackDefinition
 {
+    public function __construct(private PackDiscountRecord $record) {}
+
     /**
      * @return array{id: int, title: ?string, discount: ?array{percentage: float, badge: bool}, items: list<array>, links: list<array>}
      */
@@ -42,7 +45,9 @@ class PackDefinition
         return [
             'id' => $pack->id,
             'title' => $pack->title ? $pack->translate('title') : null,
-            'discount' => $pack->hasActiveDiscount()
+            // No promise the cart cannot keep: without a usable record of the
+            // discount, the cart gives nothing.
+            'discount' => $pack->hasActiveDiscount() && $this->record->usable()
                 ? ['percentage' => (float) $pack->discount_percentage, 'badge' => $pack->discount_badge]
                 : null,
             'items' => $items->map(fn (PackItem $item) => [

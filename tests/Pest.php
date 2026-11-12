@@ -1,13 +1,20 @@
 <?php
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 use KriticalIt\ProductPacks\Enums\OptionMode;
 use KriticalIt\ProductPacks\Enums\PackStatus;
+use KriticalIt\ProductPacks\Events\PackChanged;
+use KriticalIt\ProductPacks\Events\PackChangeReason;
 use KriticalIt\ProductPacks\Models\Pack;
 use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
+use KriticalIt\ProductPacks\Tests\LongPrefixTestCase;
 use KriticalIt\ProductPacks\Tests\TestCase;
+use Lunar\Models\Channel;
+use Lunar\Models\CustomerGroup;
 
 uses(TestCase::class)->in('Feature');
-uses(\KriticalIt\ProductPacks\Tests\LongPrefixTestCase::class)->in('Prefixed');
+uses(LongPrefixTestCase::class)->in('Prefixed');
 
 /**
  * Cups and lids linked by units, 100 ↔ 100 and 1000 ↔ 1000.
@@ -38,15 +45,15 @@ function cupsAndLids(): array
  */
 function fakePackEvents(): void
 {
-    \Illuminate\Support\Facades\Event::fake([\KriticalIt\ProductPacks\Events\PackChanged::class]);
+    Event::fake([PackChanged::class]);
 }
 
 /**
- * @return \Illuminate\Support\Collection<int, \KriticalIt\ProductPacks\Events\PackChanged>
+ * @return Collection<int, PackChanged>
  */
-function packEvents(?\KriticalIt\ProductPacks\Events\PackChangeReason $reason = null)
+function packEvents(?PackChangeReason $reason = null)
 {
-    return \Illuminate\Support\Facades\Event::dispatched(\KriticalIt\ProductPacks\Events\PackChanged::class)
+    return Event::dispatched(PackChanged::class)
         ->map(fn (array $args) => $args[0])
         ->filter(fn ($event) => $reason === null || $event->reason === $reason)
         ->values();
@@ -57,17 +64,17 @@ function packEvents(?\KriticalIt\ProductPacks\Events\PackChangeReason $reason = 
  *
  * @return list<int>
  */
-function packProductIds(?\KriticalIt\ProductPacks\Events\PackChangeReason $reason = null): array
+function packProductIds(?PackChangeReason $reason = null): array
 {
-    return \KriticalIt\ProductPacks\Events\PackChanged::normalizeIds(packEvents($reason)->flatMap(fn ($event) => $event->productIds));
+    return PackChanged::normalizeIds(packEvents($reason)->flatMap(fn ($event) => $event->productIds));
 }
 
 /**
  * A pack with the given products, in that order, and no rules.
  */
-function packWith(array $products, \KriticalIt\ProductPacks\Enums\PackStatus $status = \KriticalIt\ProductPacks\Enums\PackStatus::Draft): \KriticalIt\ProductPacks\Models\Pack
+function packWith(array $products, PackStatus $status = PackStatus::Draft): Pack
 {
-    $pack = \KriticalIt\ProductPacks\Models\Pack::create(['status' => $status]);
+    $pack = Pack::create(['status' => $status]);
     foreach ($products as $i => $product) {
         $pack->items()->create(['product_id' => $product->id, 'position' => $i + 1]);
     }
@@ -97,4 +104,14 @@ function cupsAndLidsBySize(): array
     }
 
     return compact('cups', 'lids', 'pack', 'cupItem', 'lidItem', 'link');
+}
+
+/**
+ * A default channel and customer group, and the «Packs» discount on them.
+ */
+function installPackDiscount(): void
+{
+    Channel::factory()->create(['default' => true]);
+    CustomerGroup::factory()->create(['default' => true]);
+    test()->artisan('product-packs:install-discount')->assertSuccessful();
 }

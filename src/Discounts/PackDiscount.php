@@ -35,6 +35,11 @@ class PackDiscount extends AbstractDiscountType implements LunarPanelDiscountInt
     public function apply(CartContract $cart): CartContract
     {
         /** @var Cart $cart */
+        // The record stays in the database when the plugin is turned off.
+        if (! config('lunar.product-packs.enabled')) {
+            return $cart;
+        }
+
         if (! $this->checkDiscountConditions($cart)) {
             return $cart;
         }
@@ -55,7 +60,9 @@ class PackDiscount extends AbstractDiscountType implements LunarPanelDiscountInt
 
             foreach ($match->units as $lineId => $units) {
                 $line = $lines[$lineId];
-                $amount = $discounts->amount($line, $units, $percentage);
+                // Never more than what is left of the line (a fixed coupon
+                // may have taken it to 0), so the discount never exceeds it.
+                $amount = min($discounts->amount($line, $units, $percentage), max(0, $line->subTotalDiscounted?->value ?? $line->subTotal->value));
                 $lineDiscount = ($line->discountTotal?->value ?? 0) + $amount;
 
                 $line->discountTotal = new Price($lineDiscount, $cart->currency, 1);

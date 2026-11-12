@@ -3,24 +3,23 @@
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
 use KriticalIt\ProductPacks\Actions\AddPackToCart;
+use KriticalIt\ProductPacks\Discounts\CartPackDiscounts;
 use KriticalIt\ProductPacks\Discounts\PackDiscount;
+use KriticalIt\ProductPacks\Discounts\PackDiscountRecord;
 use KriticalIt\ProductPacks\Events\PackChanged;
 use KriticalIt\ProductPacks\Events\PackChangeReason;
+use KriticalIt\ProductPacks\ProductPacks;
 use Livewire\Livewire;
 use Lunar\Admin\Filament\Resources\DiscountResource\Pages\EditDiscount;
 use Lunar\DiscountTypes\AmountOff;
 use Lunar\Models\Cart;
 use Lunar\Models\CartLine;
-use Lunar\Models\Channel;
 use Lunar\Models\Currency;
-use Lunar\Models\CustomerGroup;
 use Lunar\Models\Discount;
 use Lunar\Models\ProductVariant;
 
 beforeEach(function () {
-    Channel::factory()->create(['default' => true]);
-    CustomerGroup::factory()->create(['default' => true]);
-    $this->artisan('product-packs:install-discount')->assertSuccessful();
+    installPackDiscount();
 
     $this->setup = cupsAndLids();
     $this->setup['pack']->update(['discount_percentage' => 7, 'discount_enabled' => true]);
@@ -101,6 +100,77 @@ it('adds to a percentage coupon', function () {
         ->and(lineOf($cart, $this->cup)->subTotalDiscounted->value)->toBe(880)
         ->and(lineOf($cart, $this->lid)->discountTotal->value)->toBe(120)
         ->and($cart->discountTotal->value)->toBe(240);
+});
+
+it('never takes more than what is left of a line after a fixed coupon', function () {
+    Discount::factory()->create([
+        'type' => AmountOff::class,
+        'coupon' => 'ALL',
+        'data' => ['fixed_value' => true, 'fixed_values' => [Currency::getDefault()->code => 2000]],
+        'starts_at' => now()->subDay(),
+    ]);
+    $this->cart->update(['coupon_code' => 'ALL']);
+
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+
+    expect($cart->lines->every(fn (CartLine $line) => $line->discountTotal->value <= $line->subTotal->value))->toBeTrue()
+        ->and(lineOf($cart, $this->cup)->subTotalDiscounted->value)->toBe(0)
+        ->and($cart->discountTotal->value)->toBe(2000)
+        ->and($cart->discountTotal->value)->toBeLessThanOrEqual($cart->subTotal->value);
+});
+
+it('takes off only what is left of a line when the coupon leaves less than the pack', function () {
+    Discount::factory()->create([
+        'type' => AmountOff::class,
+        'coupon' => 'MOST',
+        'data' => ['fixed_value' => true, 'fixed_values' => [Currency::getDefault()->code => 1900]],
+        'starts_at' => now()->subDay(),
+    ]);
+    $this->cart->update(['coupon_code' => 'MOST']);
+
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+
+    // The coupon leaves 50 of each line; the pack would take 70.
+    expect(lineOf($cart, $this->cup)->discountTotal->value)->toBe(1000)
+        ->and(lineOf($cart, $this->cup)->subTotalDiscounted->value)->toBe(0)
+        ->and($cart->discountTotal->value)->toBe(2000);
+});
+
+it('does not discount when the plugin is turned off', function () {
+    config(['lunar.product-packs.enabled' => false]);
+
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+
+    expect($cart->discountTotal->value)->toBe(0)
+        ->and($cart->discountBreakdown ?? collect())->toBeEmpty();
+});
+
+it('gives nothing when the record of the discount has ended', function () {
+    Discount::where('handle', PackDiscount::HANDLE)->sole()->update(['ends_at' => now()->subDay()]);
+
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+
+    expect($cart->discountTotal->value)->toBe(0)
+        ->and(app(ProductPacks::class)->discounted())->toBeEmpty()
+        ->and(app(CartPackDiscounts::class)->for($cart))->toBe([]);
+});
+
+it('checks the record of the discount once per request, until a discount is saved', function () {
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+    expect($cart->discountTotal->value)->toBe(140);
+
+    $record = Discount::where('handle', PackDiscount::HANDLE)->sole();
+    DB::table($record->getTable())->where('id', $record->id)->update(['ends_at' => now()->subDay()]);
+    expect(app(PackDiscountRecord::class)->usable())->toBeTrue();
+
+    $record->fresh()->save();
+    expect(app(PackDiscountRecord::class)->usable())->toBeFalse()
+        ->and($cart->recalculate()->discountTotal->value)->toBe(0);
 });
 
 it('applies once with two records of its type', function () {
