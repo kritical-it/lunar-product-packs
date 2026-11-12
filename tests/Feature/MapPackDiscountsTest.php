@@ -70,3 +70,11 @@ it('keeps one tag when run twice', function () {
 
     expect($this->order->tags()->where('value', 'PACK')->count())->toBe(1);
 });
+
+it('records the packs when the cart of the order comes fresh, as after a refresh of the order', function () {
+    $this->order->setRelation('cart', Cart::find($this->cart->id));
+
+    $order = runMapPackDiscounts($this->order);
+
+    expect($order->fresh()->meta['pack_discounts'][0]['lines'][0])->toMatchArray(['quantity' => 1, 'discount' => 70]);
+});

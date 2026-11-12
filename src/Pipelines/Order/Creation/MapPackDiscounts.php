@@ -28,7 +28,9 @@ class MapPackDiscounts
     {
         /** @var Order $order */
         /** @var Cart $cart */
-        $cart = $order->cart;
+        // The pipes before refresh the order, and with it its cart: a fresh one,
+        // whose lines have no totals until it is calculated.
+        $cart = $order->cart->calculate();
         $packs = [];
 
         foreach ($this->discounts->for($cart) as $match) {
