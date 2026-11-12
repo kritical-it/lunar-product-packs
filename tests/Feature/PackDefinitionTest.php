@@ -117,3 +117,17 @@ it('drops a linked rule whose link is not of its pack', function () {
 
     expect(definitionFor($cups)['items'][0]['options'])->toBe([]);
 });
+
+it('sends the discount when active', function () {
+    ['cups' => $cups, 'pack' => $pack] = cupsAndLids();
+    $pack->update(['discount_percentage' => 7, 'discount_enabled' => true, 'discount_badge' => true]);
+
+    expect(definitionFor($cups)['discount'])->toBe(['percentage' => 7.0, 'badge' => true]);
+});
+
+it('sends no discount when disabled', function () {
+    ['cups' => $cups, 'pack' => $pack] = cupsAndLids();
+    $pack->update(['discount_percentage' => 7, 'discount_enabled' => false, 'discount_badge' => true]);
+
+    expect(definitionFor($cups)['discount'])->toBeNull();
+});

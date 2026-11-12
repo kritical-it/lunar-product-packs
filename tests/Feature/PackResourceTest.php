@@ -214,3 +214,22 @@ it('puts the pack pages menu on the right, like the products', function () {
     expect(\KriticalIt\ProductPacks\Filament\Resources\PackResource::getSubNavigationPosition())
         ->toBe(\Lunar\Admin\Filament\Resources\ProductResource::getSubNavigationPosition());
 });
+
+it('saves the discount fields from the form', function () {
+    ['pack' => $pack] = cupsAndLids();
+
+    Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()])
+        ->fillForm(['discount_percentage' => 7.5, 'discount_enabled' => true, 'discount_badge' => true])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $pack->refresh();
+    expect($pack->discount_percentage)->toBe('7.50')
+        ->and($pack->discount_enabled)->toBeTrue()
+        ->and($pack->discount_badge)->toBeTrue();
+
+    Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()])
+        ->fillForm(['discount_percentage' => 100])
+        ->call('save')
+        ->assertHasFormErrors(['discount_percentage']);
+});

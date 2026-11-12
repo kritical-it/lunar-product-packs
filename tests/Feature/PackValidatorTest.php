@@ -119,3 +119,20 @@ it('rejects a quantity below one', function () {
 
     expect(errorsOf($pack))->toContain(__('product-packs::validation.quantity_below_one'));
 });
+
+it('refuses an enabled discount without a valid percentage', function (?float $percentage, bool $enabled, bool $refused) {
+    ['pack' => $pack] = cupsAndLids();
+    $pack->update(['discount_percentage' => $percentage, 'discount_enabled' => $enabled]);
+
+    $message = __('product-packs::validation.discount_percentage_invalid');
+
+    $refused
+        ? expect(errorsOf($pack))->toContain($message)
+        : expect(errorsOf($pack))->not->toContain($message);
+})->with([
+    'null' => [null, true, true],
+    'zero' => [0, true, true],
+    'one hundred' => [100, true, true],
+    'valid' => [7.5, true, false],
+    'disabled without percentage' => [null, false, false],
+]);

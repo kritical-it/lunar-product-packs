@@ -13,4 +13,5 @@ return [
     'rule_with_wrong_fields' => 'Una opción fija tiene enlace, o una enlazada tiene valor fijo.',
     'link_without_rows' => 'Un enlace no tiene parejas: el pack no se podría comprar.',
     'quantity_below_one' => 'La cantidad de un producto del pack es menor que uno.',
+    'discount_percentage_invalid' => 'Con el descuento activo, el % tiene que ser mayor que 0 y menor que 100.',
 ];

@@ -136,6 +136,18 @@ class PackResource extends BaseResource
                     ->default(PackStatus::Draft->value)
                     ->inline()
                     ->required(),
+                Forms\Components\TextInput::make('discount_percentage')
+                    ->label(__('product-packs::panel.fields.discount_percentage'))
+                    ->helperText(__('product-packs::panel.fields.discount_percentage_help'))
+                    ->numeric()
+                    ->rules(['gt:0', 'lt:100'])
+                    ->suffix('%'),
+                Forms\Components\Toggle::make('discount_enabled')
+                    ->label(__('product-packs::panel.fields.discount_enabled'))
+                    ->helperText(__('product-packs::panel.fields.discount_enabled_help')),
+                Forms\Components\Toggle::make('discount_badge')
+                    ->label(__('product-packs::panel.fields.discount_badge'))
+                    ->helperText(__('product-packs::panel.fields.discount_badge_help')),
             ]),
             Forms\Components\Repeater::make('items')
                 ->label(__('product-packs::panel.fields.items'))

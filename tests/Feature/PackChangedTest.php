@@ -109,3 +109,14 @@ it('forgets the changes of a rolled back transaction', function () {
     expect(packEvents())->toHaveCount(1)
         ->and(packProductIds())->toBe(sorted($cups->id, $lids->id));
 });
+
+it('dispatches when a discount field changes', function (string $field, mixed $value) {
+    $this->setup['pack']->update([$field => $value]);
+
+    expect(packEvents())->toHaveCount(1)
+        ->and(packEvents()->first()->reason)->toBe(PackChangeReason::Saved);
+})->with([
+    'percentage' => ['discount_percentage', 7],
+    'enabled' => ['discount_enabled', true],
+    'badge' => ['discount_badge', true],
+]);

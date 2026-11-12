@@ -17,6 +17,9 @@ use Lunar\Base\Traits\HasTranslations;
  * @property int $id
  * @property ?\Illuminate\Support\Collection $title translatable, optional
  * @property PackStatus $status
+ * @property ?string $discount_percentage decimal with two places
+ * @property bool $discount_enabled
+ * @property bool $discount_badge show the percentage on the product page
  */
 class Pack extends BaseModel
 {
@@ -28,6 +31,9 @@ class Pack extends BaseModel
     protected $casts = [
         'title' => AsCollection::class,
         'status' => PackStatus::class,
+        'discount_percentage' => 'decimal:2',
+        'discount_enabled' => 'boolean',
+        'discount_badge' => 'boolean',
     ];
 
     protected $attributes = [
@@ -37,6 +43,16 @@ class Pack extends BaseModel
     protected static function newFactory(): PackFactory
     {
         return PackFactory::new();
+    }
+
+    /**
+     * Enabled by hand, with a percentage above 0 and below 100.
+     */
+    public function hasActiveDiscount(): bool
+    {
+        $percentage = (float) $this->discount_percentage;
+
+        return $this->discount_enabled && $percentage > 0 && $percentage < 100;
     }
 
     public function items(): HasMany

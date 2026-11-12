@@ -37,6 +37,10 @@ class PackValidator
             $errors[] = 'fewer_than_two_items';
         }
 
+        if ($pack->discount_enabled && ! $pack->hasActiveDiscount()) {
+            $errors[] = 'discount_percentage_invalid';
+        }
+
         $linkIds = $pack->links->modelKeys();
 
         foreach ($pack->items as $item) {

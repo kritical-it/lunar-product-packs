@@ -18,6 +18,15 @@ class PackFactory extends Factory
         ];
     }
 
+    public function discounted(float $percentage = 7.0, bool $badge = false): static
+    {
+        return $this->state([
+            'discount_percentage' => $percentage,
+            'discount_enabled' => true,
+            'discount_badge' => $badge,
+        ]);
+    }
+
     public function draft(): static
     {
         return $this->state(['status' => PackStatus::Draft]);

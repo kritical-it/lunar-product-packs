@@ -23,7 +23,7 @@ use Lunar\Models\Product;
 class PackDefinition
 {
     /**
-     * @return array{id: int, title: ?string, items: list<array>, links: list<array>}
+     * @return array{id: int, title: ?string, discount: ?array{percentage: float, badge: bool}, items: list<array>, links: list<array>}
      */
     public function make(Pack $pack, Product $current): array
     {
@@ -42,6 +42,9 @@ class PackDefinition
         return [
             'id' => $pack->id,
             'title' => $pack->title ? $pack->translate('title') : null,
+            'discount' => $pack->hasActiveDiscount()
+                ? ['percentage' => (float) $pack->discount_percentage, 'badge' => $pack->discount_badge]
+                : null,
             'items' => $items->map(fn (PackItem $item) => [
                 'id' => $item->id,
                 'productId' => $item->product_id,

@@ -49,7 +49,7 @@ class PackChanges
         // updated (which only fires with changes) tell them apart.
         $pack::created(fn (Pack $pack) => self::dispatch($pack->getKey(), PackChangeReason::Saved));
         $pack::updated(function (Pack $pack) {
-            if ($pack->wasChanged(['title', 'status'])) {
+            if ($pack->wasChanged(['title', 'status', 'discount_percentage', 'discount_enabled', 'discount_badge'])) {
                 self::dispatch($pack->getKey(), PackChangeReason::Saved);
             }
         });

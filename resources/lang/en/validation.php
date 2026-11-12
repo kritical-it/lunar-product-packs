@@ -13,4 +13,5 @@ return [
     'rule_with_wrong_fields' => 'A fixed option has a link, or a linked one a fixed value.',
     'link_without_rows' => 'A link has no pairs: the pack could not be bought.',
     'quantity_below_one' => 'The quantity of a product of the pack is below one.',
+    'discount_percentage_invalid' => 'With the discount active, the % must be above 0 and below 100.',
 ];
