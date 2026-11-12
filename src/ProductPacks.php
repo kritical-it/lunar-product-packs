@@ -50,6 +50,27 @@ class ProductPacks
     }
 
     /**
+     * Published packs with an active discount, each with only its visible
+     * products, two or more, and none with a fixed rule without value (as in
+     * forProduct). The highest percentage first, then by id.
+     *
+     * @return Collection<int, Pack>
+     */
+    public function discounted(): Collection
+    {
+        return Pack::modelClass()::query()
+            ->where('status', PackStatus::Published)
+            ->with(self::RELATIONS)
+            ->orderBy('id')
+            ->get()
+            ->filter(fn (Pack $pack) => $pack->hasActiveDiscount())
+            ->each(fn (Pack $pack) => $pack->setRelation('items', self::visibleItems($pack)))
+            ->filter(fn (Pack $pack) => $pack->items->count() >= 2 && ! self::hasFixedRuleWithoutValue($pack))
+            ->sortBy([['discount_percentage', 'desc'], ['id', 'asc']])
+            ->values();
+    }
+
+    /**
      * A fixed option whose value was deleted: the pack cannot offer what it
      * said (a pack «of 1000» without its 1000), so it does not show.
      */

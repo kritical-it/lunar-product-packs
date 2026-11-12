@@ -74,3 +74,27 @@ function packWith(array $products, \KriticalIt\ProductPacks\Enums\PackStatus $st
 
     return $pack;
 }
+
+/**
+ * Cups and lids linked by size, 240 ↔ 80 and 350 ↔ 90.
+ */
+function cupsAndLidsBySize(): array
+{
+    $cups = Catalog::product(['Tamaño' => ['240', '350']]);
+    $lids = Catalog::product(['Tamaño' => ['80', '90']]);
+
+    $pack = Pack::create(['title' => ['en' => 'Cups by size'], 'status' => PackStatus::Published]);
+    $cupItem = $pack->items()->create(['product_id' => $cups->id, 'position' => 1]);
+    $lidItem = $pack->items()->create(['product_id' => $lids->id, 'position' => 2]);
+    $link = $pack->links()->create(['position' => 1]);
+    $cupSize = $cupItem->options()->create(['product_option_id' => Catalog::option($cups, 'Tamaño')->id, 'mode' => OptionMode::Linked, 'pack_link_id' => $link->id]);
+    $lidSize = $lidItem->options()->create(['product_option_id' => Catalog::option($lids, 'Tamaño')->id, 'mode' => OptionMode::Linked, 'pack_link_id' => $link->id]);
+
+    foreach ([['240', '80'], ['350', '90']] as $i => [$cup, $lid]) {
+        $row = $link->rows()->create(['position' => $i + 1]);
+        $row->values()->create(['pack_item_option_id' => $cupSize->id, 'product_option_value_id' => Catalog::value($cups, 'Tamaño', $cup)->id]);
+        $row->values()->create(['pack_item_option_id' => $lidSize->id, 'product_option_value_id' => Catalog::value($lids, 'Tamaño', $lid)->id]);
+    }
+
+    return compact('cups', 'lids', 'pack', 'cupItem', 'lidItem', 'link');
+}
