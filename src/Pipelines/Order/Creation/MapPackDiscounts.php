@@ -33,7 +33,7 @@ class MapPackDiscounts
         $cart = $order->cart->calculate();
         $packs = [];
 
-        foreach ($this->discounts->for($cart) as $match) {
+        foreach ($this->discounts->applied($cart) as $match) {
             $percentage = (float) $match->pack->discount_percentage;
             $lines = [];
 

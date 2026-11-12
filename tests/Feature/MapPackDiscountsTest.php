@@ -1,10 +1,13 @@
 <?php
 
+use KriticalIt\ProductPacks\Discounts\PackDiscount;
 use KriticalIt\ProductPacks\Pipelines\Order\Creation\MapPackDiscounts;
+use Lunar\Facades\Discounts;
 use Lunar\Models\Cart;
 use Lunar\Models\Channel;
 use Lunar\Models\Currency;
 use Lunar\Models\CustomerGroup;
+use Lunar\Models\Discount;
 use Lunar\Models\Order;
 use Lunar\Models\Tag;
 
@@ -77,4 +80,16 @@ it('records the packs when the cart of the order comes fresh, as after a refresh
     $order = runMapPackDiscounts($this->order);
 
     expect($order->fresh()->meta['pack_discounts'][0]['lines'][0])->toMatchArray(['quantity' => 1, 'discount' => 70]);
+});
+
+it('records nothing when the pack discount record is not active', function () {
+    Discount::query()->where('handle', PackDiscount::HANDLE)
+        ->update(['ends_at' => now()->subDay()]);
+    Discounts::resetDiscounts();
+    $this->order->setRelation('cart', Cart::find($this->cart->id));
+
+    $order = runMapPackDiscounts($this->order);
+
+    expect($order->fresh()->meta)->not->toHaveKey('pack_discounts')
+        ->and($order->tags()->where('value', 'PACK')->exists())->toBeFalse();
 });

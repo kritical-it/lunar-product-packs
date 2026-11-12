@@ -52,6 +52,25 @@ class CartPackDiscounts
     }
 
     /**
+     * The packs of the cart whose discount Lunar did apply: none when the
+     * record of the discount is off, expired or not for this channel or
+     * customer group. Calculates the cart if it is not yet.
+     *
+     * @return list<PackMatch>
+     */
+    public function applied(Cart $cart): array
+    {
+        /** @var \Lunar\Models\Cart $cart */
+        $cart->calculate();
+
+        $hasPackDiscount = $cart->discountBreakdown?->contains(
+            fn ($breakdown) => is_a($breakdown->discount->type, PackDiscount::class, true)
+        );
+
+        return $hasPackDiscount ? $this->for($cart) : [];
+    }
+
+    /**
      * What a line takes off for its units in packs, in cents without tax:
      * the percentage of the unit price times those units.
      */
