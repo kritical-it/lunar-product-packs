@@ -10,8 +10,9 @@ use KriticalIt\ProductPacks\Events\PackChanged;
 use KriticalIt\ProductPacks\Events\PackChangeReason;
 use KriticalIt\ProductPacks\ProductPacks;
 use Livewire\Livewire;
-use Lunar\Admin\Filament\Resources\DiscountResource\Pages\EditDiscount;
+use Lunar\Admin\Filament\Resources\DiscountResource\Pages\ListDiscounts;
 use Lunar\DiscountTypes\AmountOff;
+use Lunar\Facades\Discounts;
 use Lunar\Models\Cart;
 use Lunar\Models\CartLine;
 use Lunar\Models\Currency;
@@ -257,11 +258,66 @@ it('keeps the packs for the request until a pack changes', function () {
     expect($cart->recalculate()->discountTotal->value)->toBe(200);
 });
 
-it('opens the discount in the panel', function () {
+it('loads only the packs with a product of the cart', function () {
+    $other = cupsAndLidsBySize();
+    $other['pack']->update(['discount_percentage' => 10, 'discount_enabled' => true]);
+
+    $packs = app(ProductPacks::class)->discounted([$this->setup['cups']->id]);
+
+    expect($packs->modelKeys())->toBe([$this->setup['pack']->id]);
+});
+
+it('discounts a pack whose products reach the cart later in the same request', function () {
+    $other = cupsAndLidsBySize();
+    $other['pack']->update(['discount_percentage' => 10, 'discount_enabled' => true]);
+
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+    expect($cart->discountTotal->value)->toBe(140);
+
+    $cart->add($other['cups']->variants->first(), 1);
+    $cart = $cart->add($other['lids']->variants->first(), 1);
+
+    expect($cart->discountTotal->value)->toBe(340);
+});
+
+it('keeps the packs for the request when the order counts a use of the discount', function () {
+    $this->cart->add($this->cup, 1);
+    $cart = $this->cart->add($this->lid, 1);
+    expect($cart->discountTotal->value)->toBe(140);
+
+    DB::table($this->setup['pack']->getTable())->update(['discount_percentage' => 10]);
+    // What Lunar CreateOrder does through markAsUsed.
+    $record = Discount::where('handle', PackDiscount::HANDLE)->sole();
+    $record->uses++;
+    $record->save();
+
+    expect($cart->recalculate()->discountTotal->value)->toBe(140);
+
+    $record->update(['name' => 'Packs renamed']);
+    expect($cart->recalculate()->discountTotal->value)->toBe(200);
+});
+
+it('does not offer its type in the panel', function () {
+    expect(Discounts::getTypes()->contains(fn ($type) => $type instanceof PackDiscount))->toBeFalse();
+});
+
+it('hides the record from the list of discounts', function () {
     Filament::setCurrentPanel(Filament::getPanel('lunar'));
     $this->asStaff();
+    $record = Discount::where('handle', PackDiscount::HANDLE)->sole();
+    $coupon = Discount::factory()->create(['type' => AmountOff::class]);
 
-    Livewire::test(EditDiscount::class, ['record' => Discount::where('handle', 'product-packs')->sole()->getRouteKey()])
-        ->assertSuccessful()
-        ->assertSee(__('product-packs::panel.discount.help'));
+    Livewire::test(ListDiscounts::class)
+        ->assertCanSeeTableRecords([$coupon])
+        ->assertCanNotSeeTableRecords([$record]);
 });
+
+it('does not open the record in the panel, on any of its pages', function (string $page) {
+    $this->asStaff();
+    $record = Discount::where('handle', PackDiscount::HANDLE)->sole();
+    $coupon = Discount::factory()->create(['type' => AmountOff::class]);
+
+    $this->get(route("filament.lunar.resources.discounts.{$page}", $record))->assertNotFound();
+    $this->get(route("filament.lunar.resources.discounts.{$page}", $coupon))->assertSuccessful();
+})->with(['edit', 'availability', 'limitations']);

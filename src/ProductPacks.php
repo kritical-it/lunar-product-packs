@@ -56,17 +56,20 @@ class ProductPacks
      * forProduct). The highest percentage first, then by id. None when no
      * record of the PackDiscount type is active and usable.
      *
+     * @param  list<int>|null  $productIds  only the packs with one of these products (those of a cart); all when null
      * @return Collection<int, Pack>
      */
-    public function discounted(): Collection
+    public function discounted(?array $productIds = null): Collection
     {
-        if (! app(PackDiscountRecord::class)->usable()) {
+        if (! app(PackDiscountRecord::class)->usable() || $productIds === []) {
             return collect();
         }
 
         return Pack::modelClass()::query()
             ->where('status', PackStatus::Published)
             ->where('discount_enabled', true)
+            ->when($productIds !== null, fn (Builder $query) => $query
+                ->whereHas('items', fn (Builder $query) => $query->whereIn('product_id', $productIds)))
             ->with(self::RELATIONS)
             ->orderBy('id')
             ->get()

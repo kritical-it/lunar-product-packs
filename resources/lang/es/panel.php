@@ -54,6 +54,5 @@ return [
     ],
     'discount' => [
         'name' => 'Packs',
-        'help' => 'El % de descuento se pone en cada pack, en Packs. Si desactivas este descuento o le añades condiciones (fechas, canales, grupos de clientes, usos), el descuento de los packs deja de aplicarse en el carrito y, cuando se actualicen las páginas de producto, deja de mostrarse en ellas. Para quitar el descuento de un solo pack, desactívalo en ese pack.',
     ],
 ];

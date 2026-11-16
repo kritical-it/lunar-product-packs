@@ -31,10 +31,11 @@ class PackMatcher
     {
         $lines = $lines->sortBy('id')->values();
         $remaining = $lines->pluck('quantity', 'id')->all();
+        $byProduct = $lines->groupBy('productId');
         $matches = [];
 
         foreach ($packs as $pack) {
-            $match = $this->matchPack($pack, $lines, $remaining);
+            $match = $this->matchPack($pack, $byProduct, $remaining);
 
             if ($match) {
                 $matches[] = $match;
@@ -45,30 +46,32 @@ class PackMatcher
     }
 
     /**
-     * @param  Collection<int, MatchLine>  $lines
+     * @param  Collection<int, Collection<int, MatchLine>>  $byProduct  the lines of each product id, by line id
      * @param  array<int, int>  $remaining  line id → units not yet taken, updated
      */
-    private function matchPack(Pack $pack, Collection $lines, array &$remaining): ?PackMatch
+    private function matchPack(Pack $pack, Collection $byProduct, array &$remaining): ?PackMatch
     {
         $items = ProductPacks::visibleItems($pack)
             ->filter(fn (PackItem $item) => $item->quantity > 0)
             ->values();
 
-        if ($items->isEmpty()) {
+        $linesOf = fn (PackItem $item) => $byProduct->get($item->product_id, collect());
+
+        // The cart lacks units of a product of the pack: skip it before its rules.
+        if ($items->isEmpty() || $items->contains(fn (PackItem $item) => $linesOf($item)->sum(fn (MatchLine $line) => $remaining[$line->id]) < $item->quantity)) {
             return null;
         }
 
         $rules = $items->map(fn (PackItem $item) => $this->rules($item));
 
         // Lines of each item that follow its fixed values.
-        $candidates = $items->map(fn (PackItem $item, int $i) => $lines
-            ->where('productId', $item->product_id)
+        $candidates = $items->map(fn (PackItem $item, int $i) => $linesOf($item)
             ->filter(fn (MatchLine $line) => $rules[$i]
                 ->every(fn (PackItemOption $rule) => $rule->mode !== OptionMode::Fixed
                     || in_array($rule->product_option_value_id, $line->valueIds, true)))
             ->values());
 
-        // The cart lacks a product of the pack: no combination can make one.
+        // Too few of a product follow the fixed values: no combination can make one.
         if ($items->contains(fn (PackItem $item, int $i) => $candidates[$i]->sum(fn (MatchLine $line) => $remaining[$line->id]) < $item->quantity)) {
             return null;
         }

@@ -12,7 +12,6 @@ use KriticalIt\ProductPacks\Discounts\PackDiscountRecord;
 use KriticalIt\ProductPacks\Events\PackChanged;
 use KriticalIt\ProductPacks\Models\PackItem;
 use KriticalIt\ProductPacks\Observers\PackChanges;
-use Lunar\Facades\Discounts;
 use Lunar\Facades\ModelManifest;
 use Lunar\Models\Channel;
 use Lunar\Models\CustomerGroup;
@@ -57,7 +56,8 @@ class ProductPacksServiceProvider extends ServiceProvider
 
     private function registerDiscount(): void
     {
-        Discounts::addType(PackDiscount::class);
+        // Not added with Discounts::addType: the type stays out of the panel,
+        // which only uses that list (Lunar applies a record by its class).
 
         // Priority 0 runs it after every other discount, so it adds to a coupon
         // instead of making AmountOff skip or shrink it: forced on any record
@@ -71,8 +71,15 @@ class ProductPacksServiceProvider extends ServiceProvider
         // The packs loaded for this request are stale once one changes.
         Event::listen(PackChanged::class, fn () => $this->app->make(CartPackDiscounts::class)->forget());
 
-        // The packs with a discount depend on the record of the discount.
-        $forgetRecord = function () {
+        // The packs with a discount depend on the record of the discount; not
+        // on a use counted by an order (Lunar CreateOrder saves the record on
+        // every draft), unless it has a limit of uses.
+        $forgetRecord = function ($discount) {
+            $changes = array_diff(array_keys($discount->getChanges()), ['uses', 'updated_at']);
+            if ($discount->exists && $discount->wasChanged('uses') && $changes === [] && $discount->max_uses === null) {
+                return;
+            }
+
             $this->app->make(PackDiscountRecord::class)->forget();
             $this->app->make(CartPackDiscounts::class)->forget();
         };

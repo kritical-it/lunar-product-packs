@@ -54,6 +54,5 @@ return [
     ],
     'discount' => [
         'name' => 'Packs',
-        'help' => 'The discount % is set on each pack, in Packs. If you deactivate this discount or add conditions to it (dates, channels, customer groups, uses), the pack discount stops applying in the cart and, once the product pages are refreshed, stops showing on them. To remove the discount of a single pack, turn it off in that pack.',
     ],
 ];

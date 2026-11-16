@@ -13,13 +13,14 @@ use Lunar\Models\Contracts\ProductVariant;
 /**
  * The complete packs of a cart, and what each of its lines takes off.
  *
- * Scoped: the packs with a discount load once per request (every cart
- * calculation asks for them), and a PackChanged forgets them.
+ * Scoped: the packs with a discount and a product of the cart load once
+ * per request and set of products (every cart calculation asks for them),
+ * and a PackChanged forgets them.
  */
 class CartPackDiscounts
 {
-    /** @var Collection<int, Pack>|null */
-    private ?Collection $packs = null;
+    /** @var array<string, Collection<int, Pack>> by the sorted ids of the products of the cart */
+    private array $packs = [];
 
     public function __construct(
         private ProductPacks $productPacks,
@@ -34,7 +35,9 @@ class CartPackDiscounts
         /** @var \Lunar\Models\Cart $cart */
         $lines = $cart->lines->filter(fn (CartLine $line) => $line->purchasable instanceof ProductVariant);
 
-        if ($lines->isEmpty() || $this->packs()->isEmpty()) {
+        $packs = $this->packs($lines->map(fn (CartLine $line) => (int) $line->purchasable->product_id)->unique()->sort()->values()->all());
+
+        if ($packs->isEmpty()) {
             return [];
         }
 
@@ -48,7 +51,7 @@ class CartPackDiscounts
             quantity: $line->quantity,
         ))->values();
 
-        return $this->matcher->match($matchLines, $this->packs());
+        return $this->matcher->match($matchLines, $packs);
     }
 
     /**
@@ -82,14 +85,15 @@ class CartPackDiscounts
 
     public function forget(): void
     {
-        $this->packs = null;
+        $this->packs = [];
     }
 
     /**
+     * @param  list<int>  $productIds  sorted
      * @return Collection<int, Pack>
      */
-    private function packs(): Collection
+    private function packs(array $productIds): Collection
     {
-        return $this->packs ??= $this->productPacks->discounted();
+        return $this->packs[implode(',', $productIds)] ??= $this->productPacks->discounted($productIds);
     }
 }

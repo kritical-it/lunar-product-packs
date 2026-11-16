@@ -75,14 +75,28 @@ customer groups created later are attached to it on creation; rerunning
 `product-packs:install-discount` attaches any that are missing and leaves the
 rest as they are.
 
-The % is set on each pack. The «Packs» record only switches the discount on
-or off for all of them: while no record of this type is active and usable
-(deactivated, scheduled, expired or out of uses), no cart applies it and the
-pack definitions send `discount: null`, so the product pages stop promising
-it. Product pages are usually cached, and a change of the «Packs» record does
-not fire `PackChanged`: after changing it, refresh the product pages (in
-Packea, the «Invalidar en la tienda» action). To remove the discount of one
-pack, turn it off in the pack.
+The % is set on each pack; to remove the discount of one pack, turn it off
+in the pack. The «Packs» record does not show in the Lunar panel: it is out of
+the list of discounts, its pages answer 404 and its type is not offered when
+creating a discount. A change by hand would stop every pack discount, and the
+cached product pages would go on promising it. Without a record of this type
+that is active and usable, no cart applies the discount and the pack
+definitions send `discount: null`.
+
+Lunar saves the record on every order it creates, to count a use: never give
+it `max_uses` or `max_uses_per_user`, or the draft orders would use it up.
+
+### Going back to a version without the pack discount
+
+A cart fails while a record of this type exists and its class does not, so
+remove the record before deploying a version without the plugin or with one
+older than the discount:
+
+```php
+KriticalIt\ProductPacks\Discounts\PackDiscount::removeRecords();
+```
+
+(in a migration `down()`, then `php artisan migrate:rollback`, or in tinker).
 
 To record the packs on the order and tag it `PACK`, add the pipeline after
 `MapDiscountBreakdown` in `config/lunar/orders.php`:

@@ -78,3 +78,17 @@ it('attaches channels and customer groups created later', function () {
             $group->id => ['enabled' => true, 'visible' => true, 'active' => true],
         ]);
 });
+
+it('removes the records of its type, with what they have attached', function () {
+    Channel::factory()->create(['default' => true]);
+    CustomerGroup::factory()->create(['default' => true]);
+    $this->artisan('product-packs:install-discount')->assertSuccessful();
+    $record = Discount::where('handle', PackDiscount::HANDLE)->sole();
+    $other = Discount::factory()->create();
+
+    PackDiscount::removeRecords();
+
+    expect(Discount::pluck('id')->all())->toBe([$other->id])
+        ->and($record->channels()->count())->toBe(0)
+        ->and($record->customerGroups()->count())->toBe(0);
+});

@@ -2,9 +2,7 @@
 
 namespace KriticalIt\ProductPacks\Discounts;
 
-use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\Collection;
-use Lunar\Admin\Base\LunarPanelDiscountInterface;
 use Lunar\Base\ValueObjects\Cart\DiscountBreakdown;
 use Lunar\Base\ValueObjects\Cart\DiscountBreakdownLine;
 use Lunar\DataTypes\Price;
@@ -23,7 +21,7 @@ use Lunar\Models\Discount;
  * off: a coupon of 5 % and a pack of 7 % make 12 %. The amount comes from
  * the price of the line, not from what is left after the other discounts.
  */
-class PackDiscount extends AbstractDiscountType implements LunarPanelDiscountInterface
+class PackDiscount extends AbstractDiscountType
 {
     public const HANDLE = 'product-packs';
 
@@ -118,6 +116,20 @@ class PackDiscount extends AbstractDiscountType implements LunarPanelDiscountInt
     }
 
     /**
+     * Remove the records of this type and what they have attached, so no
+     * cart looks for the type (before going back to a version without it).
+     */
+    public static function removeRecords(): void
+    {
+        static::records()->each(function (Discount $discount) {
+            $discount->channels()->detach();
+            $discount->customerGroups()->detach();
+            $discount->customers()->detach();
+            $discount->delete();
+        });
+    }
+
+    /**
      * The records of this type.
      *
      * @return \Illuminate\Database\Eloquent\Collection<int, Discount>
@@ -125,29 +137,5 @@ class PackDiscount extends AbstractDiscountType implements LunarPanelDiscountInt
     public static function records(): \Illuminate\Database\Eloquent\Collection
     {
         return Discount::modelClass()::query()->where('type', static::class)->get();
-    }
-
-    public function lunarPanelSchema(): array
-    {
-        return [
-            Placeholder::make('product_packs_help')
-                ->hiddenLabel()
-                ->content(__('product-packs::panel.discount.help')),
-        ];
-    }
-
-    public function lunarPanelOnFill(array $data): array
-    {
-        return $data;
-    }
-
-    public function lunarPanelOnSave(array $data): array
-    {
-        return $data;
-    }
-
-    public function lunarPanelRelationManagers(): array
-    {
-        return [];
     }
 }
