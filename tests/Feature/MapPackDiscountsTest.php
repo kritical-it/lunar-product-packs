@@ -2,6 +2,7 @@
 
 use KriticalIt\ProductPacks\Discounts\PackDiscount;
 use KriticalIt\ProductPacks\Pipelines\Order\Creation\MapPackDiscounts;
+use Lunar\DiscountTypes\AmountOff;
 use Lunar\Facades\Discounts;
 use Lunar\Models\Cart;
 use Lunar\Models\Channel;
@@ -32,6 +33,22 @@ function runMapPackDiscounts(Order $order): Order
     return app(MapPackDiscounts::class)->handle($order, fn ($o) => $o);
 }
 
+/** A fixed coupon on the cart of the order, which comes fresh as after a refresh. */
+function fixedCoupon(int $amount): void
+{
+    $coupon = Discount::factory()->create([
+        'type' => AmountOff::class,
+        'coupon' => 'FIXED',
+        'data' => ['fixed_value' => true, 'fixed_values' => [test()->cart->currency->code => $amount]],
+        'starts_at' => now()->subDay(),
+    ]);
+    // On every channel: the order factory makes another one the default.
+    PackDiscount::makeAvailable($coupon, replace: true);
+    test()->cart->update(['coupon_code' => 'FIXED']);
+    Discounts::resetDiscounts();
+    test()->order->setRelation('cart', Cart::find(test()->cart->id));
+}
+
 it('records the packs of the order', function () {
     $order = runMapPackDiscounts($this->order);
 
@@ -47,31 +64,39 @@ it('records the packs of the order', function () {
         ->toBe(collect([$this->cup->id, $this->lid->id])->sort()->values()->all());
 });
 
-it('tags the order without touching its other tags', function () {
+it('leaves the tags of the order to the shop', function () {
     $this->order->tags()->attach(Tag::firstOrCreate(['value' => 'WEB']));
 
     runMapPackDiscounts($this->order);
 
-    expect($this->order->tags()->pluck('value')->sort()->values()->all())->toBe(['PACK', 'WEB']);
+    expect($this->order->tags()->pluck('value')->all())->toBe(['WEB']);
 });
 
-it('removes the tag and the meta when the cart has no pack any more', function () {
-    $this->order->tags()->attach(Tag::firstOrCreate(['value' => 'WEB']));
+it('removes the meta when the cart has no pack any more', function () {
     runMapPackDiscounts($this->order);
 
     $cart = $this->cart->remove($this->cart->lines->firstWhere('purchasable_id', $this->lid->id)->id);
     $this->order->setRelation('cart', $cart);
     $order = runMapPackDiscounts($this->order);
 
-    expect($order->fresh()->meta)->not->toHaveKey('pack_discounts')
-        ->and($order->tags()->pluck('value')->all())->toBe(['WEB']);
+    expect($order->fresh()->meta)->not->toHaveKey('pack_discounts');
 });
 
-it('keeps one tag when run twice', function () {
-    runMapPackDiscounts($this->order);
-    runMapPackDiscounts($this->order);
+it('records what the cart took off, only what a fixed coupon left of each line', function () {
+    fixedCoupon(1900);
 
-    expect($this->order->tags()->where('value', 'PACK')->count())->toBe(1);
+    $order = runMapPackDiscounts($this->order);
+
+    // The coupon leaves 50 of each line; the pack would take 70.
+    expect(collect($order->fresh()->meta['pack_discounts'][0]['lines'])->pluck('discount')->all())->toBe([50, 50]);
+});
+
+it('records nothing when a fixed coupon leaves nothing to take off', function () {
+    fixedCoupon(2000);
+
+    $order = runMapPackDiscounts($this->order);
+
+    expect($order->fresh()->meta)->not->toHaveKey('pack_discounts');
 });
 
 it('records the packs when the cart of the order comes fresh, as after a refresh of the order', function () {
@@ -90,6 +115,5 @@ it('records nothing when the pack discount record is not active', function () {
 
     $order = runMapPackDiscounts($this->order);
 
-    expect($order->fresh()->meta)->not->toHaveKey('pack_discounts')
-        ->and($order->tags()->where('value', 'PACK')->exists())->toBeFalse();
+    expect($order->fresh()->meta)->not->toHaveKey('pack_discounts');
 });

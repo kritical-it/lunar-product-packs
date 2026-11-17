@@ -233,3 +233,12 @@ it('saves the discount fields from the form', function () {
         ->call('save')
         ->assertHasFormErrors(['discount_percentage']);
 });
+
+it('refuses a percentage with more than two decimals, which the column would round to 100', function () {
+    ['pack' => $pack] = cupsAndLids();
+
+    Livewire::test(EditPack::class, ['record' => $pack->getRouteKey()])
+        ->fillForm(['discount_percentage' => 99.995, 'discount_enabled' => true])
+        ->call('save')
+        ->assertHasFormErrors(['discount_percentage']);
+});

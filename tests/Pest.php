@@ -7,6 +7,7 @@ use KriticalIt\ProductPacks\Enums\PackStatus;
 use KriticalIt\ProductPacks\Events\PackChanged;
 use KriticalIt\ProductPacks\Events\PackChangeReason;
 use KriticalIt\ProductPacks\Models\Pack;
+use KriticalIt\ProductPacks\Tests\DisabledPluginTestCase;
 use KriticalIt\ProductPacks\Tests\Fixtures\Catalog;
 use KriticalIt\ProductPacks\Tests\LongPrefixTestCase;
 use KriticalIt\ProductPacks\Tests\TestCase;
@@ -15,6 +16,7 @@ use Lunar\Models\CustomerGroup;
 
 uses(TestCase::class)->in('Feature');
 uses(LongPrefixTestCase::class)->in('Prefixed');
+uses(DisabledPluginTestCase::class)->in('Disabled');
 
 /**
  * Cups and lids linked by units, 100 ↔ 100 and 1000 ↔ 1000.

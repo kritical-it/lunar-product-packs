@@ -8,20 +8,18 @@ use Lunar\Models\Cart;
 use Lunar\Models\CartLine;
 use Lunar\Models\Contracts\Order as OrderContract;
 use Lunar\Models\Order;
-use Lunar\Models\Tag;
 
 /**
- * Records on the order the packs that took a discount, and tags it PACK.
+ * Records on the order the packs that took a discount, with what each line
+ * took off. The tags of the order are for the shop (CartPackDiscounts::applied
+ * tells whether it has packs).
  *
  * It goes on the order meta, not on the lines: CreateOrderLines matches the
  * order lines to the cart lines by their meta. Add it after
- * MapDiscountBreakdown in config/lunar/orders.php. The other tags stay as
- * they are.
+ * MapDiscountBreakdown in config/lunar/orders.php.
  */
 class MapPackDiscounts
 {
-    public const TAG = 'PACK';
-
     public function __construct(private CartPackDiscounts $discounts) {}
 
     public function handle(OrderContract $order, Closure $next): mixed
@@ -33,7 +31,8 @@ class MapPackDiscounts
         $cart = $order->cart->calculate();
         $packs = [];
 
-        foreach ($this->discounts->applied($cart) as $match) {
+        foreach ($this->discounts->applied($cart) as $breakdown) {
+            $match = $breakdown->match;
             $percentage = (float) $match->pack->discount_percentage;
             $lines = [];
 
@@ -48,7 +47,7 @@ class MapPackDiscounts
                 $lines[] = [
                     'purchasable_id' => $line->purchasable_id,
                     'quantity' => $units,
-                    'discount' => $this->discounts->amount($line, $units, $percentage),
+                    'discount' => $breakdown->amounts[$lineId] ?? 0,
                 ];
             }
 
@@ -67,16 +66,10 @@ class MapPackDiscounts
             $meta['pack_discounts'] = $packs;
             $order->meta = $meta;
             $order->save();
-            $order->tags()->syncWithoutDetaching([Tag::firstOrCreate(['value' => self::TAG])->id]);
-        } else {
-            if (isset($meta['pack_discounts'])) {
-                unset($meta['pack_discounts']);
-                $order->meta = $meta;
-                $order->save();
-            }
-            if ($tag = Tag::where('value', self::TAG)->first()) {
-                $order->tags()->detach($tag->id);
-            }
+        } elseif (isset($meta['pack_discounts'])) {
+            unset($meta['pack_discounts']);
+            $order->meta = $meta;
+            $order->save();
         }
 
         return $next($order);

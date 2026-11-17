@@ -11,6 +11,9 @@
         <testsuite name="Prefixed">
             <directory suffix="Test.php">./tests/Prefixed</directory>
         </testsuite>
+        <testsuite name="Disabled">
+            <directory suffix="Test.php">./tests/Disabled</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

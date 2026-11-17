@@ -140,7 +140,8 @@ class PackResource extends BaseResource
                     ->label(__('product-packs::panel.fields.discount_percentage'))
                     ->helperText(__('product-packs::panel.fields.discount_percentage_help'))
                     ->numeric()
-                    ->rules(['gt:0', 'lt:100'])
+                    // Two decimals at most: the column would round 99.995 to 100.
+                    ->rules(['gt:0', 'lt:100', 'decimal:0,2'])
                     ->suffix('%'),
                 Forms\Components\Toggle::make('discount_enabled')
                     ->label(__('product-packs::panel.fields.discount_enabled'))

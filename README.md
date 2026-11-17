@@ -73,7 +73,8 @@ This creates the «Packs» discount. It has priority 0, so it applies last
 (after any coupon) and adds to what the line already has off. Channels and
 customer groups created later are attached to it on creation; rerunning
 `product-packs:install-discount` attaches any that are missing and leaves the
-rest as they are.
+rest as they are. The command is there with the plugin turned off too, so a
+migration that runs it does not fail in those environments.
 
 The % is set on each pack; to remove the discount of one pack, turn it off
 in the pack. The «Packs» record does not show in the Lunar panel: it is out of
@@ -86,19 +87,7 @@ definitions send `discount: null`.
 Lunar saves the record on every order it creates, to count a use: never give
 it `max_uses` or `max_uses_per_user`, or the draft orders would use it up.
 
-### Going back to a version without the pack discount
-
-A cart fails while a record of this type exists and its class does not, so
-remove the record before deploying a version without the plugin or with one
-older than the discount:
-
-```php
-KriticalIt\ProductPacks\Discounts\PackDiscount::removeRecords();
-```
-
-(in a migration `down()`, then `php artisan migrate:rollback`, or in tinker).
-
-To record the packs on the order and tag it `PACK`, add the pipeline after
+To record the packs on the order, add the pipeline after
 `MapDiscountBreakdown` in `config/lunar/orders.php`:
 
 ```php
@@ -113,7 +102,22 @@ To record the packs on the order and tag it `PACK`, add the pipeline after
 
 The order meta gets `pack_discounts`: a list of `pack_id`, `title`,
 `percentage`, `count` and `lines` (`purchasable_id`, `quantity`, `discount`
-in cents without tax). The other tags of the order are not touched.
+in cents without tax): what each line took off, after any coupon, so a pack
+that a coupon left at 0 is not listed. The plugin does not tag the order; a
+shop that wants a tag can ask `CartPackDiscounts::applied($cart)`, which gives
+the packs Lunar discounted.
+
+### Going back to a version without the pack discount
+
+A cart fails while a record of this type exists and its class does not, so
+remove the record before deploying a version without the plugin or with one
+older than the discount:
+
+```php
+KriticalIt\ProductPacks\Discounts\PackDiscount::removeRecords();
+```
+
+(in a migration `down()`, then `php artisan migrate:rollback`, or in tinker).
 
 ## The admin
 

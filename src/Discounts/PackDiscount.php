@@ -55,6 +55,7 @@ class PackDiscount extends AbstractDiscountType
             $percentage = (float) $match->pack->discount_percentage;
             $total = 0;
             $affected = collect();
+            $amounts = [];
 
             foreach ($match->units as $lineId => $units) {
                 $line = $lines[$lineId];
@@ -67,6 +68,7 @@ class PackDiscount extends AbstractDiscountType
                 $line->subTotalDiscounted = new Price(max(0, $line->subTotal->value - $lineDiscount), $cart->currency, 1);
 
                 $affected->push(new DiscountBreakdownLine(line: $line, quantity: $units));
+                $amounts[$lineId] = $amount;
                 $total += $amount;
             }
 
@@ -74,10 +76,12 @@ class PackDiscount extends AbstractDiscountType
                 continue;
             }
 
-            $this->addDiscountBreakdown($cart, new DiscountBreakdown(
+            $this->addDiscountBreakdown($cart, new PackDiscountBreakdown(
                 price: new Price($total, $cart->currency, 1),
                 lines: $affected,
                 discount: $this->discount,
+                match: $match,
+                amounts: $amounts,
             ));
             $applied = true;
         }

@@ -30,6 +30,12 @@ class ProductPacksServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Also with the plugin turned off: a shop runs it from a migration,
+        // which must not fail in the environments that turn the plugin off.
+        if ($this->app->runningInConsole()) {
+            $this->commands([InstallPackDiscount::class]);
+        }
+
         if (! config('lunar.product-packs.enabled')) {
             return;
         }
@@ -50,7 +56,7 @@ class ProductPacksServiceProvider extends ServiceProvider
         $this->registerDiscount();
 
         if ($this->app->runningInConsole()) {
-            $this->commands([ImportCrossSellPacks::class, InstallPackDiscount::class]);
+            $this->commands([ImportCrossSellPacks::class]);
         }
     }
 
